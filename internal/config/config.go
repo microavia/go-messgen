@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -31,14 +30,9 @@ func (c Config) String() string {
 	return string(b)
 }
 
-var (
-	once   sync.Once //nolint:gochecknoglobals
-	config Config    //nolint:gochecknoglobals
-)
-
 //nolint:lll
-func initKingpin() {
-	config = Config{}
+func initKingpin() Config {
+	config := Config{}
 
 	config.App = kingpin.New("messgen", "Lightweight and fast message serialization library code generator")
 
@@ -48,15 +42,15 @@ func initKingpin() {
 	config.Lang = config.App.Flag("lang", "Output language (cpp=C++, go=Golang, js=JavaScript, md=Markdown)").Short('l').Required().Enum("cpp", "go", "js", "md")
 	config.Defines = config.App.Flag("define", "Defines variables in 'key=value' format").Short('D').PlaceHolder("key=value").StringMap()
 	config.Verbose = config.App.Flag("verbose", "Verbose output").Short('v').Bool()
+
+	return config
 }
 
 // Parse exported func should have comment or be unexported.
 func Parse(args []string) (Config, error) {
-	once.Do(func() { initKingpin() })
+	config := initKingpin()
 
-	var err error
-
-	config.Parsed, err = config.App.Parse(args)
+	_, err := config.App.Parse(args)
 	if err != nil {
 		return config, fmt.Errorf("parsing config: %w", err)
 	}
