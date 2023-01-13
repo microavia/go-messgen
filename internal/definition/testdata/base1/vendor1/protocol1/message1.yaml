@@ -1,0 +1,3 @@
+id: 1
+fields:
+  - {name: field1, type: Bool, descr: "field 1"}

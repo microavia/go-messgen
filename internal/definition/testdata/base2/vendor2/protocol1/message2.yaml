@@ -1,0 +1,4 @@
+id: 2
+fields:
+  - {name: field1, type: Bool, descr: "field 1"}
+  - {name: field2, type: string, descr: "field 2"}

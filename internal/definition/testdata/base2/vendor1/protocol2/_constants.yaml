@@ -1,0 +1,14 @@
+- name: Bool
+  basetype: uint8
+  fields:
+    - {name: false, value: 0}
+    - {name: true, value: 1}
+
+- name: Language
+  basetype: string
+  fields:
+    - { name: go, value: go, descr: "go lang" }
+    - { name: js, value: js, descr: "js lang" }
+    - { name: cpp, value: cpp, descr: "cpp lang" }
+    - { name: md, value: md, descr: "md lang" }
+

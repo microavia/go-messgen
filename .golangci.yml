@@ -1,0 +1,74 @@
+# Options for analysis running.
+run:
+  # Timeout for analysis, e.g. 30s, 5m.
+  # Default: 1m
+  timeout: 10m
+  # Which dirs to skip: issues from them won't be reported.
+  # Can use regexp here: `generated.*`, regexp is applied on full path.
+  # Default value is empty list,
+  # but default dirs are skipped independently of this option's value (see skip-dirs-use-default).
+  # "/" will be replaced by current OS file path separator to properly work on Windows.
+  skip-dirs:
+    - contracts/microavia
+  output:
+    format: tab
+
+# output configuration options
+output:
+
+# All available settings of specific linters.
+linters-settings:
+  # See the dedicated "linters-settings" documentation section.
+  govet:
+    check-shadowing: true
+  golint:
+    min-confidence: 0.1
+  maligned:
+    suggest-new: true
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  misspell:
+    locale: US
+  lll:
+    line-length: 140
+
+linters:
+  enable-all: true
+  disable:
+    - scopelint # deprecated: The repository of the linter has been deprecated by the owner.  Replaced by exportloopref.
+    - golint # deprecated: The repository of the linter has been archived by the owner.  Replaced by revive.
+    - deadcode # deprecated: The owner seems to have abandoned the linter.  Replaced by unused.
+    - ifshort # deprecated: The repository of the linter has been deprecated by the owner.
+    - varcheck # deprecated: The owner seems to have abandoned the linter.  Replaced by unused.
+    - interfacer # deprecated: The repository of the linter has been archived by the owner.
+    - exhaustivestruct # deprecated: The owner seems to have abandoned the linter.  Replaced by exhaustruct.
+    - maligned # deprecated: The repository of the linter has been archived by the owner.  Replaced by govet 'fieldalignment'.
+    - structcheck # deprecated: The owner seems to have abandoned the linter.  Replaced by unused.
+    - nosnakecase # deprecated: The repository of the linter has been deprecated by the owner.  Replaced by revive(var-naming).
+    - rowserrcheck # disabled because of generics.
+    - sqlclosecheck # disabled because of generics.
+    - structcheck # disabled because of generics.
+    - wastedassign # disabled because of generics.
+    - dupl # too many false positives
+    - tagliatelle # too many false positives
+    - gci # conflicting with goimports order
+    - godot # useless
+    - exhaustruct # almost useless
+    - varnamelen # too many false positives
+    #- goimports # disabled temporary because of can't run linter goanalysis_metalinter: goimports: can't extract issues from gofmt diff output
+    #- gofmt # disabled temporary because of can't run linter goanalysis_metalinter: goimports: can't extract issues from gofmt diff output
+issues:
+  # Show only new issues: if there are unstaged changes or untracked files,
+  # only those changes are analyzed, else only changes in HEAD~ are analyzed.
+  # It's a super-useful option for integration of golangci-lint into existing large codebase.
+  # It's not practical to fix all existing issues at the moment of integration:
+  # much better don't allow issues in new code.
+  #
+  # Default: false.
+  # new: true
+  # Show only new issues created after git revision `REV`.
+  # new-from-rev: remotes/origin/main
+severity:
+  # See the dedicated "severity" documentation section.
+  option: value
