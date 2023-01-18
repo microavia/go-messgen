@@ -17,7 +17,7 @@ import (
 var testdata embed.FS
 
 var expectedModule = definition.Definition{
-	Proto: definition.Proto{ProtoID: 777},
+	Proto: definition.Proto{ProtoID: 10},
 	Constants: []definition.Constant{
 		{
 			Name:     "Bool",

@@ -1,0 +1,5 @@
+- name: Bool
+  basetype: uint128
+  fields:
+    - {name: false, value: 0 }
+    - {name: true, value: 1 }

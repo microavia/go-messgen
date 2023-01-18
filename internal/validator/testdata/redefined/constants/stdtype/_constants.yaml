@@ -1,0 +1,6 @@
+- name: int64
+  basetype: uint8
+  fields:
+    - {name: false, value: 0 }
+    - {name: true, value: 1 }
+    - {name: false, value: 0 }

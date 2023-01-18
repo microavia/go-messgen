@@ -8,7 +8,7 @@ type Definition struct {
 }
 
 type Proto struct {
-	ProtoID int `json:"proto_id"`
+	ProtoID uint8 `json:"proto_id"`
 }
 
 type Constant struct {
