@@ -108,6 +108,47 @@ var testRows = []testRow{
 		modules:  []config.Module{{Vendor: "messages", Protocol: "protocol1"}},
 		err:      validator.ErrUnknownType,
 	},
+	{
+		name:     "valid service",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "valid", Protocol: "protocol1"}},
+	},
+	{
+		name:     "empty request in the serving",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "emptyreq", Protocol: "serving"}},
+		err:      validator.ErrEmptyRequest,
+	},
+	{
+		name:     "bad serving request type",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "badreqtype", Protocol: "serving"}},
+		err:      validator.ErrUnknownType,
+	},
+	{
+		name:     "bad serving response type",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "badresptype", Protocol: "serving"}},
+		err:      validator.ErrUnknownType,
+	},
+	{
+		name:     "duplicate request message",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "dupreq", Protocol: "serving"}},
+		err:      validator.ErrDupID,
+	},
+	{
+		name:     "duplicate response message",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "dupresp", Protocol: "serving"}},
+		err:      validator.ErrDupID,
+	},
+	{
+		name:     "duplicate request and response message",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "dupreqresp", Protocol: "serving"}},
+		err:      validator.ErrDupID,
+	},
 }
 
 func TestValidate(t *testing.T) {

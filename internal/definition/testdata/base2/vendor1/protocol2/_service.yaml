@@ -1,8 +1,4 @@
 Serving:
-  message1:
-  message2:
-  message3: Bool
-Sending:
-  message5:
-  message6: Language
-
+  - { request: message1}
+  - { request: message2}
+  - { request: message3, response: Bool}

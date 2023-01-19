@@ -1,9 +1,14 @@
 package definition
 
+import (
+	"github.com/microavia/go-messgen/internal/config"
+)
+
 type Definition struct {
+	Module    config.Module
 	Proto     Proto
 	Constants []Constant
-	Messages  map[string]Message
+	Messages  []Message
 	Service   Service
 }
 
@@ -24,18 +29,23 @@ type ConstantField struct {
 }
 
 type Message struct {
+	Name        string         `json:"-"`
 	ID          int            `json:"id"`
 	Fields      []MessageField `json:"fields"`
 	Description string         `json:"descr"`
 }
 
 type MessageField struct {
-	Name        string `json:"name"`
-	Type        string `json:"type"`
-	Description string `json:"descr"`
+	Name        string    `json:"name"`
+	Type        FieldType `json:"type"`
+	Description string    `json:"descr"`
 }
 
 type Service struct {
-	Serving map[string]string
-	Sending map[string]string
+	Serving []ServicePair `json:"serving"`
+}
+
+type ServicePair struct {
+	Request  string `json:"request"`
+	Response string `json:"response"`
 }

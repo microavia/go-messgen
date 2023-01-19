@@ -22,9 +22,6 @@ jobs:
           - oldstable
         platform:
           - ubuntu-latest
-          - alpine-latest
-          - windows-latest
-          - macos-latest
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Install Go

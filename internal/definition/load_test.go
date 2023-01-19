@@ -38,90 +38,97 @@ var expectedModule = definition.Definition{
 			},
 		},
 	},
-	Messages: map[string]definition.Message{
-		"message1": {
-			ID: 1,
+	Messages: []definition.Message{
+		{
+			Name: "message1",
+			ID:   1,
 			Fields: []definition.MessageField{
-				{Name: "field1", Type: "Bool", Description: "field 1"},
+				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
 			},
 		},
-		"message2": {
-			ID: 2,
+		{
+			Name: "message2",
+			ID:   2,
 			Fields: []definition.MessageField{
-				{Name: "field1", Type: "Bool", Description: "field 1"},
-				{Name: "field2", Type: "string", Description: "field 2"},
+				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
 			},
 		},
-		"message3": {
-			ID: 3,
+		{
+			Name: "message3",
+			ID:   3,
 			Fields: []definition.MessageField{
-				{Name: "field1", Type: "Bool", Description: "field 1"},
-				{Name: "field2", Type: "string", Description: "field 2"},
-				{Name: "field3", Type: "int8", Description: "field 3"},
+				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
 			},
 		},
-		"message4": {
-			ID: 4,
+		{
+			Name: "message4",
+			ID:   4,
 			Fields: []definition.MessageField{
-				{Name: "field1", Type: "Bool", Description: "field 1"},
-				{Name: "field2", Type: "string", Description: "field 2"},
-				{Name: "field3", Type: "int8", Description: "field 3"},
-				{Name: "field4", Type: "float", Description: "field 4"},
+				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
+				{Name: "field4", Type: fieldType("float", false, 0), Description: "field 4"},
 			},
 		},
-		"message5": {
-			ID: 5,
+		{
+			Name: "message5",
+			ID:   5,
 			Fields: []definition.MessageField{
-				{Name: "field1", Type: "Bool", Description: "field 1"},
-				{Name: "field2", Type: "string", Description: "field 2"},
-				{Name: "field3", Type: "int8", Description: "field 3"},
-				{Name: "field4", Type: "float", Description: "field 4"},
-				{Name: "field5", Type: "float", Description: "field 5"},
+				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
+				{Name: "field4", Type: fieldType("float", true, 10), Description: "field 4"},
+				{Name: "field5", Type: fieldType("float", true, 0), Description: "field 5"},
 			},
 		},
-		"message6": {
-			ID: 6,
+		{
+			Name: "message6",
+			ID:   6,
 			Fields: []definition.MessageField{
-				{Name: "field1", Type: "Bool", Description: "field 1"},
-				{Name: "field2", Type: "string", Description: "field 2"},
-				{Name: "field3", Type: "int8", Description: "field 3"},
-				{Name: "field4", Type: "float", Description: "field 4"},
-				{Name: "field5", Type: "float", Description: "field 5"},
-				{Name: "field6", Type: "Language", Description: "field 6"},
+				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
+				{Name: "field4", Type: fieldType("float", true, 10), Description: "field 4"},
+				{Name: "field5", Type: fieldType("float", true, 0), Description: "field 5"},
+				{Name: "field6", Type: fieldType("Language", false, 0), Description: "field 6"},
 			},
 		},
 	},
 	Service: definition.Service{
-		Serving: map[string]string{
-			"message1": "",
-			"message2": "",
-			"message3": "Bool",
-		},
-		Sending: map[string]string{
-			"message5": "",
-			"message6": "Language",
+		Serving: []definition.ServicePair{
+			{Request: "message1"},
+			{Request: "message2"},
+			{Request: "message3", Response: "Bool"},
 		},
 	},
 }
 
-var expected = map[config.Module]*definition.Definition{
-	{Vendor: "vendor1", Protocol: "protocol1"}: &expectedModule,
-	{Vendor: "vendor1", Protocol: "protocol2"}: &expectedModule,
-	{Vendor: "vendor2", Protocol: "protocol1"}: &expectedModule,
+var expected = []*definition.Definition{
+	setModuleID(&expectedModule, config.Module{Vendor: "vendor1", Protocol: "protocol1"}),
+	setModuleID(&expectedModule, config.Module{Vendor: "vendor1", Protocol: "protocol2"}),
+	setModuleID(&expectedModule, config.Module{Vendor: "vendor2", Protocol: "protocol1"}),
+}
+
+func setModuleID(def *definition.Definition, module config.Module) *definition.Definition {
+	out := *def
+	out.Module = module
+	return &out
 }
 
 func TestLoadSingle(t *testing.T) {
 	t.Parallel()
 
-	module1 := config.Module{Vendor: "vendor1", Protocol: "protocol1"}
-
 	d, err := definition.LoadModules(
 		testdata,
 		[]string{"testdata/base1"},
-		[]config.Module{module1},
+		[]config.Module{{Vendor: "vendor1", Protocol: "protocol1"}},
 	)
 	require.NoError(t, err, "load definition")
-	require.Equal(t, expected[module1], d[module1], "load definition")
+	require.Len(t, d, 1, "load definition")
+	require.Equal(t, expected[0], d[0], "load definition")
 }
 
 func TestLoadMultiple(t *testing.T) {
@@ -182,4 +189,12 @@ func TestLoadNonExisting(t *testing.T) {
 	)
 	require.ErrorIs(t, err, definition.ErrBadSource, "load not existing: %v", err)
 	require.Nil(t, d, "load not existing")
+}
+
+func fieldType(name string, isArray bool, arraySize int) definition.FieldType {
+	return definition.FieldType{
+		Name:      definition.TypeName(name),
+		Array:     isArray,
+		ArraySize: arraySize,
+	}
 }

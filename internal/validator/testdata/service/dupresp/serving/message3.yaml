@@ -1,0 +1,3 @@
+id: 3
+fields:
+  - {name: field2, type: string, descr: "field 2"}

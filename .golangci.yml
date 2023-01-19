@@ -56,8 +56,6 @@ linters:
     - godot # useless
     - exhaustruct # almost useless
     - varnamelen # too many false positives
-    #- goimports # disabled temporary because of can't run linter goanalysis_metalinter: goimports: can't extract issues from gofmt diff output
-    #- gofmt # disabled temporary because of can't run linter goanalysis_metalinter: goimports: can't extract issues from gofmt diff output
 issues:
   # Show only new issues: if there are unstaged changes or untracked files,
   # only those changes are analyzed, else only changes in HEAD~ are analyzed.

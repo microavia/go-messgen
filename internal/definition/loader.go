@@ -19,8 +19,8 @@ var (
 	ErrNotDir    = fmt.Errorf("not a directory: %w", ErrBadSource)
 )
 
-func LoadModules(fsys fs.FS, roots []string, modules []config.Module) (map[config.Module]*Definition, error) {
-	out := make(map[config.Module]*Definition, len(modules))
+func LoadModules(fsys fs.FS, roots []string, modules []config.Module) ([]*Definition, error) {
+	out := make([]*Definition, 0, len(modules))
 
 	for i, module := range modules {
 		def, err := loadModule(fsys, roots, module)
@@ -28,7 +28,9 @@ func LoadModules(fsys fs.FS, roots []string, modules []config.Module) (map[confi
 			return nil, fmt.Errorf("loading module %d of %d: %+v: %w", i+1, len(modules), module, err)
 		}
 
-		out[module] = def
+		def.Module = module
+
+		out = append(out, def)
 	}
 
 	return out, nil
@@ -93,7 +95,8 @@ func checkFile(fsys fs.FS, root string, out *Definition, path string, d fs.DirEn
 	case filepath.Ext(d.Name()) == yamlSuffix:
 		v := Message{}
 		if err = loadFile(fsys, path, &v); err == nil {
-			out.Messages = appendMap(out.Messages, strings.TrimSuffix(d.Name(), yamlSuffix), v)
+			v.Name = strings.TrimSuffix(d.Name(), yamlSuffix)
+			out.Messages = append(out.Messages, v)
 		}
 	}
 
@@ -107,16 +110,6 @@ func loadFile(fsys fs.FS, path string, o interface{}) error {
 	}
 
 	return yaml.Unmarshal(b, o) //nolint:wrapcheck
-}
-
-func appendMap[T any](m map[string]T, k string, v T) map[string]T {
-	if m == nil {
-		m = make(map[string]T)
-	}
-
-	m[k] = v
-
-	return m
 }
 
 func checkDir(fsys fs.FS, name string) error {
