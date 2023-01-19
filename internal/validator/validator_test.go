@@ -1,3 +1,4 @@
+//nolint:wrapcheck,gochecknoglobals
 package validator_test
 
 import (
@@ -151,6 +152,7 @@ var testRows = []testRow{
 	},
 }
 
+//nolint:paralleltest,tparallel
 func TestValidate(t *testing.T) {
 	for _, row := range testRows {
 		t.Run(row.name, func(innerT *testing.T) { testRun(innerT, row) })
@@ -158,6 +160,7 @@ func TestValidate(t *testing.T) {
 }
 
 func testRun(t *testing.T, row testRow) {
+	t.Helper()
 	t.Parallel()
 
 	if err := validateDef(row.basedirs, row.modules); row.err != nil {

@@ -115,6 +115,7 @@ var expected = []*definition.Definition{
 func setModuleID(def *definition.Definition, module config.Module) *definition.Definition {
 	out := *def
 	out.Module = module
+
 	return &out
 }
 

@@ -245,7 +245,7 @@ func checkServicePairs(pairs []definition.ServicePair, types map[string]struct{}
 	return nil
 }
 
-func ternary[T any](cond bool, a, b T) T {
+func ternary[T any](cond bool, a, b T) T { //nolint:ireturn
 	if cond {
 		return a
 	}
