@@ -43,7 +43,7 @@ func main() {
 		structlog.DefaultLogger.Fatal("validating definitions: ", err)
 	}
 
-	fmt.Printf("%s\n", prettyPrint(def))
+	fmt.Printf("%s\n", prettyPrint(def)) //nolint:forbidigo
 }
 
 func prettyPrint(v interface{}) string {
@@ -59,6 +59,7 @@ var errNotFound = errors.New("not found")
 
 func absDirs(in []string) ([]string, error) {
 	out := make([]string, 0, len(in))
+
 	for _, dir := range in {
 		absDir, err := filepath.Abs(dir)
 		if err != nil {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log"
 	"path/filepath"
 	"strings"
 
@@ -60,7 +59,6 @@ func Load(fsys fs.FS, baseDir string, module config.Module) (*Definition, error)
 	root := strings.TrimPrefix(filepath.Join(baseDir, module.Vendor, module.Protocol), "/")
 
 	if err := checkDir(fsys, root); err != nil {
-		log.Printf("")
 		return nil, fmt.Errorf("loading  %q/%+v: %q: %w", baseDir, module, err, ErrBadData)
 	}
 
