@@ -97,4 +97,3 @@ Example for protocol documentation generation:
 messgen -b ./base_dir -m my_vendor/my_protocol -l md -o out/md
 ----
 
-
