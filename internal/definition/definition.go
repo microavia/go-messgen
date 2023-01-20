@@ -29,7 +29,7 @@ type ConstantField struct {
 }
 
 type Message struct {
-	Name        string         `json:"-"`
+	Name        string         `json:"name"`
 	ID          int            `json:"id"`
 	Fields      []MessageField `json:"fields"`
 	Description string         `json:"descr"`

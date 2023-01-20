@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -56,17 +57,22 @@ func loadModule(fsys fs.FS, baseDirs []string, module config.Module) (*Definitio
 func Load(fsys fs.FS, baseDir string, module config.Module) (*Definition, error) {
 	out := &Definition{}
 
-	root := filepath.Join(baseDir, module.Vendor, module.Protocol)
+	root := strings.TrimPrefix(filepath.Join(baseDir, module.Vendor, module.Protocol), "/")
 
 	if err := checkDir(fsys, root); err != nil {
-		return nil, fmt.Errorf("loading %+v from %q: %q: %w", module, baseDir, err, ErrBadData)
+		log.Printf("")
+		return nil, fmt.Errorf("loading  %q/%+v: %q: %w", baseDir, module, err, ErrBadData)
 	}
 
 	err := fs.WalkDir(
 		fsys,
 		root,
 		func(path string, d fs.DirEntry, errInner error) error {
-			return checkFile(fsys, root, out, path, d, errInner)
+			if errInner != nil {
+				return errInner
+			}
+
+			return checkFile(fsys, root, out, path, d)
 		},
 	)
 	if err != nil {
@@ -76,31 +82,36 @@ func Load(fsys fs.FS, baseDir string, module config.Module) (*Definition, error)
 	return out, nil
 }
 
-func checkFile(fsys fs.FS, root string, out *Definition, path string, d fs.DirEntry, err error) error {
+func checkFile(fsys fs.FS, root string, out *Definition, path string, d fs.DirEntry) error {
 	const yamlSuffix = ".yaml"
 
 	switch {
-	case err != nil:
-		return err
 	case d.IsDir():
 		return nil
 	case path != filepath.Join(root, d.Name()):
 		return nil
 	case d.Name() == "_protocol.yaml":
-		err = loadFile(fsys, path, &out.Proto)
+		return loadFile(fsys, path, &out.Proto)
 	case d.Name() == "_constants.yaml":
-		err = loadFile(fsys, path, &out.Constants)
+		return loadFile(fsys, path, &out.Constants)
 	case d.Name() == "_service.yaml":
-		err = loadFile(fsys, path, &out.Service)
+		return loadFile(fsys, path, &out.Service)
 	case filepath.Ext(d.Name()) == yamlSuffix:
 		v := Message{}
-		if err = loadFile(fsys, path, &v); err == nil {
-			v.Name = strings.TrimSuffix(d.Name(), yamlSuffix)
-			out.Messages = append(out.Messages, v)
+		if err := loadFile(fsys, path, &v); err != nil {
+			return fmt.Errorf("loading %q: %w", path, err)
 		}
+
+		out.Messages = append(out.Messages, setName(v, strings.TrimSuffix(d.Name(), yamlSuffix)))
 	}
 
-	return err
+	return nil
+}
+
+func setName(m Message, name string) Message {
+	m.Name = name
+
+	return m
 }
 
 func loadFile(fsys fs.FS, path string, o interface{}) error {

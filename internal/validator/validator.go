@@ -112,7 +112,15 @@ func validateMessages(
 			return fmt.Errorf("constant type redefined: %q: %w", msg.Name, ErrRedefined)
 		}
 
-		if err := validateMessage(msg, mergeSets(stdTypes, constants)); err != nil {
+		err := validateMessage(
+			msg,
+			mergeSets(
+				stdTypes,
+				constants,
+				buildSet(buildMap(messages, func(v definition.Message) string { return v.Name })),
+			),
+		)
+		if err != nil {
 			return fmt.Errorf("%q: %w", msg.Name, err)
 		}
 	}
