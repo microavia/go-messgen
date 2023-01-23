@@ -9,10 +9,8 @@ import (
 
 var ErrInvalidInput = errors.New("invalid input")
 
-type TypeName string
-
 type FieldType struct {
-	Name      TypeName
+	Name      string
 	Array     bool
 	ArraySize int
 }
@@ -26,7 +24,7 @@ func (t *FieldType) UnmarshalJSON(b []byte) error {
 	}
 
 	*t = FieldType{
-		Name:      TypeName(typeAndSize[1]),
+		Name:      string(typeAndSize[1]),
 		Array:     len(typeAndSize[2]) > 0,
 		ArraySize: mustA2I(typeAndSize[3]),
 	}

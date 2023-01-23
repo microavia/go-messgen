@@ -39,7 +39,7 @@ func initKingpin() Config {
 	config.BaseDirs = config.App.Flag("basedir", "Message definition base directories").Short('b').Required().Strings()
 	config.Modules = ModulesFlag(config.App.Flag("module", "Modules").Short('m').Required().PlaceHolder("VENDOR/PROTOCOL"))
 	config.OutDir = config.App.Flag("outdir", "Output directory").Short('o').Default(".").String()
-	config.Lang = config.App.Flag("lang", "Output language (cpp=C++, go=Golang, js=JavaScript, md=Markdown)").Short('l').Required().Enum("cpp", "go", "js", "md")
+	config.Lang = config.App.Flag("lang", "Output language (cpp=C++, go=Golang, js=JavaScript, md=Markdown)").Short('l').Required().Enum("cpp", "go", "newgo", "js", "md")
 	config.Defines = config.App.Flag("define", "Defines variables in 'key=value' format").Short('D').PlaceHolder("key=value").StringMap()
 	config.Verbose = config.App.Flag("verbose", "Verbose output").Short('v').Bool()
 

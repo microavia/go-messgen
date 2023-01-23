@@ -18,11 +18,11 @@ var testdata embed.FS
 
 var expectedModule = definition.Definition{
 	Proto: definition.Proto{ProtoID: 10},
-	Constants: []definition.Constant{
+	Enums: []definition.Enum{
 		{
 			Name:     "Bool",
 			BaseType: "uint8",
-			Fields: []definition.ConstantField{
+			Values: []definition.EnumValue{
 				{Name: "false", Value: "0"},
 				{Name: "true", Value: "1"},
 			},
@@ -30,7 +30,7 @@ var expectedModule = definition.Definition{
 		{
 			Name:     "Language",
 			BaseType: "string",
-			Fields: []definition.ConstantField{
+			Values: []definition.EnumValue{
 				{Name: "go", Value: "go", Description: "go lang"},
 				{Name: "js", Value: "js", Description: "js lang"},
 				{Name: "cpp", Value: "cpp", Description: "cpp lang"},
@@ -194,7 +194,7 @@ func TestLoadNonExisting(t *testing.T) {
 
 func fieldType(name string, isArray bool, arraySize int) definition.FieldType {
 	return definition.FieldType{
-		Name:      definition.TypeName(name),
+		Name:      name,
 		Array:     isArray,
 		ArraySize: arraySize,
 	}

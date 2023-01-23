@@ -1,0 +1,84 @@
+package message
+
+import (
+	"encoding/binary"
+	"fmt"
+)
+
+{{- $Constants := .Constants}}
+{{$Messages := .Messages}}
+
+{{range $Message := .Message}}
+{{$MessageName := CamelCase $Message.Name}}
+const {{$MessageName}}MsgId = {{$Message.ID}}
+const {{$MessageName}}MinMsgSize = {{$Message.MinSize}}
+
+type {{$MessageName}} struct {
+	{{range $Field := $Message.Fields}}
+	{{- $FieldTypeName := $Field.Type.Name}}
+	{{- if In $Constants $FieldTypeName}}{{$FieldTypeName = print (CamelCase $FieldTypeName) "Enum"}}{{end}}
+	{{- if In $Messages  $FieldTypeName}}{{$FieldTypeName = CamelCase $FieldTypeName}}{{end -}}
+    {{CamelCase $Field.Name}} {{if $Field.Type.Array}}[{{if $Field.Type.ArraySize}}{{$Field.Type.ArraySize}}{{end}}]{{end}}{{$FieldTypeName}}
+	{{end -}}
+}
+
+func (v *{{$MessageName}}) MsgId() int {
+	return {{$MessageName}}MsgId
+}
+
+func (v *{{$MessageName}}) MsgSize() int {
+	{{range $Field := $Message.Fields}}
+	{{- $FieldTypeName := $Field.Type.Name}}
+	{{- $FieldTypeSize := print $Field.Type.Name Size}}
+	{{- if In $Constants $Field.Type.Name}}{{$FieldTypeSize = print (CamelCase $FieldTypeName) "EnumSize"}}{{end}}
+	{{- if In $Messages  $Field.Type.Name}}{{$FieldTypeSize = CamelCase $FieldTypeName}}{{end -}}
+	{{$FieldName := CamelCase $Field.Name}}
+	return 0 +
+	{{if $Field.Type.Array}}
+	{{if $Field.Type.ArraySize}}{{$Field.Type.ArraySize}} * {{$FieldTypeName}} + {{end}}
+    func() int { res := 0; for _, u := range v.{{$FieldName}} { res += u.Size() }; return res }() +
+	{{end -}}
+	0
+}
+
+func (v *{{$MessageName}}) String() string {
+	return fmt.Sprintf("<{{$MessageName}}{{range $Message.Fields}} {{.Name}}=%v{{end}}>",
+		{{range $Message.Fields}}v.{{CamelCase .Name}},{{end}})
+}
+{{end}}
+
+func (v *FilesyncResourceStatus) Pack(buf []byte) (int, error) {
+	if len(buf) < v.MsgSize() {
+		return 0, fmt.Errorf("invalid buffer size for packing FilesyncResourceStatus: %d, should be >=%d", len(buf), v.MsgSize())
+	}
+	ptr := 0
+	binary.LittleEndian.PutUint64(buf[ptr:], v.FilesSize)
+	ptr += 8
+	binary.LittleEndian.PutUint32(buf[ptr:], v.ManetId)
+	ptr += 4
+	binary.LittleEndian.PutUint32(buf[ptr:], v.FlightId)
+	ptr += 4
+	binary.LittleEndian.PutUint16(buf[ptr:], v.FilesCount)
+	ptr += 2
+	buf[ptr] = byte(v.ResourceTypeIndex)
+	ptr += 1
+	return ptr, nil
+}
+
+func (v *FilesyncResourceStatus) Unpack(buf []byte) error {
+	if len(buf) < FilesyncResourceStatusMinMsgSize {
+		return fmt.Errorf("invalid buffer size for unpacking FilesyncResourceStatus: %d, should be >=%d", len(buf), FilesyncResourceStatusMinMsgSize)
+	}
+	ptr := 0
+	v.FilesSize = binary.LittleEndian.Uint64(buf[ptr:])
+	ptr += 8
+	v.ManetId = binary.LittleEndian.Uint32(buf[ptr:])
+	ptr += 4
+	v.FlightId = binary.LittleEndian.Uint32(buf[ptr:])
+	ptr += 4
+	v.FilesCount = binary.LittleEndian.Uint16(buf[ptr:])
+	ptr += 2
+	v.ResourceTypeIndex = uint8(buf[ptr])
+	ptr += 1
+	return nil
+}

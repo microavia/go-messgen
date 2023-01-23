@@ -37,14 +37,14 @@ func Validate(modules []*definition.Definition) error {
 			return fmt.Errorf("%+v: %w", moduleID, ErrNoMessages)
 		}
 
-		if err := validateConstants(module.Constants, stdTypesSet); err != nil {
+		if err := validateConstants(module.Enums, stdTypesSet); err != nil {
 			return fmt.Errorf("%+v: %w", moduleID, err)
 		}
 
 		err := validateMessages(
 			module.Messages,
 			stdTypesSet,
-			buildSet(buildMap(module.Constants, func(v definition.Constant) string { return v.Name })),
+			buildSet(buildMap(module.Enums, func(v definition.Enum) string { return v.Name })),
 		)
 		if err != nil {
 			return fmt.Errorf("%+v: %w", moduleID, err)
@@ -63,10 +63,10 @@ func Validate(modules []*definition.Definition) error {
 }
 
 func validateConstants(
-	constants []definition.Constant,
+	constants []definition.Enum,
 	stdTypes map[string]struct{},
 ) error {
-	if err := checkUniq(constants, func(v definition.Constant) string { return v.Name }); err != nil {
+	if err := checkUniq(constants, func(v definition.Enum) string { return v.Name }); err != nil {
 		return fmt.Errorf("checking constants uniqueness: %w", err)
 	}
 
@@ -79,7 +79,7 @@ func validateConstants(
 	return nil
 }
 
-func validateConstant(c definition.Constant, stdTypes map[string]struct{}) error {
+func validateConstant(c definition.Enum, stdTypes map[string]struct{}) error {
 	if checkPresence(stdTypes, c.Name) {
 		return fmt.Errorf("standard type redefined: %q: %w", c.Name, ErrRedefined)
 	}
@@ -88,7 +88,7 @@ func validateConstant(c definition.Constant, stdTypes map[string]struct{}) error
 		return fmt.Errorf("constant %+v: base type: %w", c, ErrUnknownType)
 	}
 
-	if err := checkUniq(c.Fields, func(v definition.ConstantField) string { return v.Name }); err != nil {
+	if err := checkUniq(c.Values, func(v definition.EnumValue) string { return v.Name }); err != nil {
 		return fmt.Errorf("checking fields uniqueness: %w", err)
 	}
 

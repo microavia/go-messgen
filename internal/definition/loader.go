@@ -91,7 +91,7 @@ func checkFile(fsys fs.FS, root string, out *Definition, path string, d fs.DirEn
 	case d.Name() == "_protocol.yaml":
 		return loadFile(fsys, path, &out.Proto)
 	case d.Name() == "_constants.yaml":
-		return loadFile(fsys, path, &out.Constants)
+		return loadFile(fsys, path, &out.Enums)
 	case d.Name() == "_service.yaml":
 		return loadFile(fsys, path, &out.Service)
 	case filepath.Ext(d.Name()) == yamlSuffix:

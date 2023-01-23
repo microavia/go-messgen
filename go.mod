@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/powerman/structlog v0.7.3
+	github.com/stoewer/go-strcase v1.2.1
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

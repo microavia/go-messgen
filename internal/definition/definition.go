@@ -5,27 +5,15 @@ import (
 )
 
 type Definition struct {
-	Module    config.Module
-	Proto     Proto
-	Constants []Constant
-	Messages  []Message
-	Service   Service
+	Module   config.Module
+	Proto    Proto
+	Enums    []Enum
+	Messages []Message
+	Service  Service
 }
 
 type Proto struct {
 	ProtoID uint8 `json:"proto_id"`
-}
-
-type Constant struct {
-	Name     string          `json:"name"`
-	BaseType string          `json:"basetype"`
-	Fields   []ConstantField `json:"fields"`
-}
-
-type ConstantField struct {
-	Name        string `json:"name"`
-	Value       string `json:"value"`
-	Description string `json:"descr"`
 }
 
 type Message struct {
@@ -33,6 +21,7 @@ type Message struct {
 	ID          int            `json:"id"`
 	Fields      []MessageField `json:"fields"`
 	Description string         `json:"descr"`
+	MinSize     int            `json:"min_size"`
 }
 
 type MessageField struct {
