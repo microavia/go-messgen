@@ -4,16 +4,29 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"github.com/microavia/go-messgen/internal/stdtypes"
 )
 
 var ErrTypeUnknown = errors.New("type unknown")
 
 type Enum struct {
-	Name     string      `json:"name"`
-	BaseType string      `json:"basetype"`
-	Values   []EnumValue `json:"fields"`
+	Name     string     `json:"name"`
+	BaseType string     `json:"basetype"`
+	Values   EnumValues `json:"fields"`
+}
+
+type Enums map[string]Enum
+
+func (e *Enums) UnmarshalJSON(b []byte) error {
+	return MapUnmarshalJSON(
+		b,
+		(*map[string]Enum)(e),
+		func(v Enum) (Enum, error) { return v, nil },
+		func(v Enum) string { return v.Name },
+	)
+}
+
+func (e *Enums) MarshalJSON() ([]byte, error) {
+	return json.Marshal(MapToSlice(*e, func(s1, s2 string) bool { return s1 < s2 }))
 }
 
 type EnumValue struct {
@@ -22,26 +35,29 @@ type EnumValue struct {
 	Description string `json:"descr"`
 }
 
-func (e *Enum) UnmarshalJSON(b []byte) error {
-	var rawEnum struct {
-		Name     string      `json:"name"`
-		BaseType string      `json:"basetype"`
-		Values   []EnumValue `json:"fields"`
+type EnumValues map[string]EnumValue
+
+func (e *EnumValues) UnmarshalJSON(b []byte) error {
+	type rawValue struct {
+		Name        interface{} `json:"name"`
+		Value       interface{} `json:"value"`
+		Description string      `json:"descr"`
 	}
 
-	if err := json.Unmarshal(b, &rawEnum); err != nil {
-		return err
-	}
+	return MapUnmarshalJSON(
+		b,
+		(*map[string]EnumValue)(e),
+		func(v rawValue) (EnumValue, error) {
+			return EnumValue{
+				Name:        fmt.Sprintf("%v", v.Name),
+				Value:       fmt.Sprintf("%v", v.Value),
+				Description: v.Description,
+			}, nil
+		},
+		func(v EnumValue) string { return v.Name },
+	)
+}
 
-	if _, ok := stdtypes.StdTypes[rawEnum.BaseType]; !ok {
-		return fmt.Errorf("%q: %w", rawEnum.BaseType, ErrTypeUnknown)
-	}
-
-	*e = Enum{
-		Name:     rawEnum.Name,
-		BaseType: rawEnum.BaseType,
-		Values:   make([]EnumValue, 0),
-	}
-
-	return nil
+func (e *EnumValues) MarshalJSON() ([]byte, error) {
+	return json.Marshal(MapToSlice(*e, func(s1, s2 string) bool { return s1 < s2 }))
 }

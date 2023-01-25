@@ -25,7 +25,7 @@ func LoadModules(fsys fs.FS, roots []string, modules []config.Module) ([]*Defini
 	for i, module := range modules {
 		def, err := loadModule(fsys, roots, module)
 		if err != nil {
-			return nil, fmt.Errorf("loading module %d of %d: %+v: %w", i+1, len(modules), module, err)
+			return nil, fmt.Errorf("loading module %d of %d: %w", i+1, len(modules), err)
 		}
 
 		def.Module = module
@@ -38,16 +38,17 @@ func LoadModules(fsys fs.FS, roots []string, modules []config.Module) ([]*Defini
 
 func loadModule(fsys fs.FS, baseDirs []string, module config.Module) (*Definition, error) {
 	for _, baseDir := range baseDirs {
-		def, err := Load(fsys, baseDir, module)
-		if err == nil {
-			return def, nil
-		}
-
-		if errors.Is(err, ErrBadSource) {
+		err := checkDir(fsys, strings.TrimPrefix(filepath.Join(baseDir, module.Vendor, module.Protocol), "/"))
+		if err != nil {
 			continue
 		}
 
-		return nil, fmt.Errorf("loading %+v: %q: %w", module, err, ErrBadData)
+		def, err := Load(fsys, baseDir, module)
+		if err != nil {
+			return nil, fmt.Errorf("loading %+v: %w", module, err)
+		}
+
+		return def, nil
 	}
 
 	return nil, fmt.Errorf("loading %+v: %w", module, ErrNotExist)
@@ -55,63 +56,48 @@ func loadModule(fsys fs.FS, baseDirs []string, module config.Module) (*Definitio
 
 func Load(fsys fs.FS, baseDir string, module config.Module) (*Definition, error) {
 	out := &Definition{}
-
 	root := strings.TrimPrefix(filepath.Join(baseDir, module.Vendor, module.Protocol), "/")
-
-	if err := checkDir(fsys, root); err != nil {
-		return nil, fmt.Errorf("loading  %q/%+v: %q: %w", baseDir, module, err, ErrBadData)
-	}
 
 	err := fs.WalkDir(
 		fsys,
 		root,
 		func(path string, d fs.DirEntry, errInner error) error {
-			if errInner != nil {
-				return errInner
-			}
-
-			return checkFile(fsys, root, out, path, d)
+			return checkFile(fsys, root, out, path, d, errInner)
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("loading %+v from %q: %q: %w", module, baseDir, err, err)
+		return nil, fmt.Errorf("loading %+v from %q: %w", module, baseDir, err)
 	}
 
 	return out, nil
 }
 
-func checkFile(fsys fs.FS, root string, out *Definition, path string, d fs.DirEntry) error {
+func checkFile(fsys fs.FS, root string, out *Definition, path string, d fs.DirEntry, err error) error {
 	const yamlSuffix = ".yaml"
 
 	switch {
+	case err != nil:
+		return err
 	case d.IsDir():
 		return nil
 	case path != filepath.Join(root, d.Name()):
 		return nil
 	case d.Name() == "_protocol.yaml":
-		return loadFile(fsys, path, &out.Proto)
+		err = loadFile(fsys, path, &out.Proto)
 	case d.Name() == "_constants.yaml":
-		return loadFile(fsys, path, &out.Enums)
+		err = loadFile(fsys, path, &out.Enums)
 	case d.Name() == "_service.yaml":
-		return loadFile(fsys, path, &out.Service)
+		err = loadFile(fsys, path, &out.Service)
 	case filepath.Ext(d.Name()) == yamlSuffix:
 		v := Message{}
-		if err := loadFile(fsys, path, &v); err != nil {
-			return fmt.Errorf("loading %q: %w", path, err)
+		if err = loadFile(fsys, path, &v); err == nil {
+			v.Name = strings.TrimSuffix(d.Name(), yamlSuffix)
+			out.Messages, err = MapAppend(out.Messages, v.Name, v)
 		}
-
-		out.Messages = append(out.Messages, setName(v, strings.TrimSuffix(d.Name(), yamlSuffix)))
 	}
 
-	return nil
+	return err
 }
-
-func setName(m Message, name string) Message {
-	m.Name = name
-
-	return m
-}
-
 func loadFile(fsys fs.FS, path string, o interface{}) error {
 	b, err := fs.ReadFile(fsys, path)
 	if err != nil {

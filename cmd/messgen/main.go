@@ -32,7 +32,7 @@ func main() {
 
 	baseDirs, err := absDirs(*cfg.BaseDirs)
 	if err != nil {
-		structlog.DefaultLogger.Fatal("loading definitions: ", err)
+		structlog.DefaultLogger.Fatal("enumerating base dirs: ", err)
 	}
 
 	def, err := definition.LoadModules(os.DirFS("/"), baseDirs, *cfg.Modules)

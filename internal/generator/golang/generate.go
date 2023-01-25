@@ -3,13 +3,13 @@ package golang
 import (
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"text/template"
 
 	"github.com/microavia/go-messgen/internal/config"
 	"github.com/microavia/go-messgen/internal/definition"
+	"github.com/microavia/go-messgen/internal/stdtypes"
 )
 
 func GenerateModules(outDir string, definitions []*definition.Definition) error {
@@ -22,34 +22,17 @@ func GenerateModules(outDir string, definitions []*definition.Definition) error 
 	return nil
 }
 
+type templateArgs struct {
+	Module   definition.Definition
+	StdTypes map[string]stdtypes.StdType
+}
+
 func GenerateModule(outDir string, module definition.Definition) error {
 	outDir = filepath.Join(outDir, module.Module.Vendor, module.Module.Protocol, "message")
 
 	for fileName, tmpl := range tmplCompiled {
-		if fileName == "messages.go" {
-			continue
-		}
-
-		log.Printf("file %q tmpl %+v", fileName, tmpl)
-
-		if err := templateExecute(outDir, fileName, tmpl, module); err != nil {
-			return fmt.Errorf("module %+v: generating %q: %w", module.Module, fileName, err)
-		}
-	}
-
-	for _, message := range module.Messages {
-		var (
-			fileName = message.Name + ".go"
-			tmpl     = tmplCompiled["messages.go"]
-			msg      = messageArgs{
-				Module:    module.Module,
-				Constants: module.Enums,
-				Messages:  module.Messages,
-				Message:   []definition.Message{message},
-			}
-		)
-
-		if err := templateExecute(outDir, fileName, tmpl, msg); err != nil {
+		err := templateExecute(outDir, fileName, tmpl, templateArgs{Module: module, StdTypes: stdtypes.StdTypes})
+		if err != nil {
 			return fmt.Errorf("module %+v: generating %q: %w", module.Module, fileName, err)
 		}
 	}

@@ -1,4 +1,3 @@
-//nolint:wrapcheck,gochecknoglobals
 package validator_test
 
 import (
@@ -77,7 +76,7 @@ var testRows = []testRow{
 		name:     "duplicate constant name",
 		basedirs: []string{"testdata/redefined"},
 		modules:  []config.Module{{Vendor: "constants", Protocol: "constname"}},
-		err:      validator.ErrDupID,
+		err:      definition.ErrDuplicateKey,
 	},
 	{
 		name:     "standard type redefined by constant",
@@ -95,13 +94,13 @@ var testRows = []testRow{
 		name:     "redefined constant field name",
 		basedirs: []string{"testdata/redefined"},
 		modules:  []config.Module{{Vendor: "constants", Protocol: "fields"}},
-		err:      validator.ErrDupID,
+		err:      definition.ErrDuplicateKey,
 	},
 	{
 		name:     "redefined message field name",
 		basedirs: []string{"testdata/redefined"},
 		modules:  []config.Module{{Vendor: "messages", Protocol: "fields"}},
-		err:      validator.ErrDupID,
+		err:      definition.ErrDuplicateKey,
 	},
 	{
 		name:     "invalid message field type",
@@ -121,9 +120,21 @@ var testRows = []testRow{
 		err:      validator.ErrEmptyRequest,
 	},
 	{
+		name:     "empty request in the sending",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "emptyreq", Protocol: "sending"}},
+		err:      validator.ErrEmptyRequest,
+	},
+	{
 		name:     "bad serving request type",
 		basedirs: []string{"testdata/service"},
 		modules:  []config.Module{{Vendor: "badreqtype", Protocol: "serving"}},
+		err:      validator.ErrUnknownType,
+	},
+	{
+		name:     "bad sending request type",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "badreqtype", Protocol: "sending"}},
 		err:      validator.ErrUnknownType,
 	},
 	{
@@ -133,26 +144,61 @@ var testRows = []testRow{
 		err:      validator.ErrUnknownType,
 	},
 	{
-		name:     "duplicate request message",
+		name:     "bad sending response type",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "badresptype", Protocol: "sending"}},
+		err:      validator.ErrUnknownType,
+	},
+	{
+		name:     "duplicate request message in serving",
 		basedirs: []string{"testdata/service"},
 		modules:  []config.Module{{Vendor: "dupreq", Protocol: "serving"}},
 		err:      validator.ErrDupID,
 	},
 	{
-		name:     "duplicate response message",
+		name:     "duplicate request message in sending",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "dupreq", Protocol: "sending"}},
+		err:      definition.ErrDuplicateKey,
+	},
+	{
+		name:     "duplicate response message in serving",
 		basedirs: []string{"testdata/service"},
 		modules:  []config.Module{{Vendor: "dupresp", Protocol: "serving"}},
 		err:      validator.ErrDupID,
 	},
 	{
-		name:     "duplicate request and response message",
+		name:     "duplicate response message in sending",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "dupresp", Protocol: "sending"}},
+		err:      validator.ErrDupID,
+	},
+	{
+		name:     "duplicate request and response message in serving",
 		basedirs: []string{"testdata/service"},
 		modules:  []config.Module{{Vendor: "dupreqresp", Protocol: "serving"}},
 		err:      validator.ErrDupID,
 	},
+	{
+		name:     "duplicate request and response message in sending",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "dupreqresp", Protocol: "sending"}},
+		err:      validator.ErrDupID,
+	},
+	{
+		name:     "clash request and response message in serving",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "clashreqresp", Protocol: "serving"}},
+		err:      validator.ErrDupID,
+	},
+	{
+		name:     "clash request and response message in sending",
+		basedirs: []string{"testdata/service"},
+		modules:  []config.Module{{Vendor: "clashreqresp", Protocol: "sending"}},
+		err:      validator.ErrDupID,
+	},
 }
 
-//nolint:paralleltest,tparallel
 func TestValidate(t *testing.T) {
 	for _, row := range testRows {
 		t.Run(row.name, func(innerT *testing.T) { testRun(innerT, row) })
@@ -160,11 +206,10 @@ func TestValidate(t *testing.T) {
 }
 
 func testRun(t *testing.T, row testRow) {
-	t.Helper()
 	t.Parallel()
 
 	if err := validateDef(row.basedirs, row.modules); row.err != nil {
-		require.ErrorIs(t, err, row.err, "validate %q: %+v", row.name, err)
+		require.ErrorIs(t, err, row.err, "validate %q: %+v/%+v: %+v", row.name, row.basedirs, row.modules, err)
 	} else {
 		require.NoError(t, err, "validate %q: %+v", row.name, err)
 	}

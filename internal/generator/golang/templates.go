@@ -12,6 +12,7 @@ import (
 	"github.com/stoewer/go-strcase"
 
 	"github.com/microavia/go-messgen/internal/definition"
+	"github.com/microavia/go-messgen/internal/stdtypes"
 )
 
 //go:embed templates/*
@@ -39,10 +40,12 @@ var tmplCompiled = func() map[string]*template.Template {
 }()
 
 var TmplFuncs = template.FuncMap{
-	"CamelCase":  strcase.UpperCamelCase,
-	"TrimPrefix": strings.TrimPrefix,
-	"FixValue":   fixValue,
-	"In":         isIn,
+	"CamelCase":     strcase.UpperCamelCase,
+	"TrimPrefix":    strings.TrimPrefix,
+	"FixValue":      fixValue,
+	"In":            isIn,
+	"Iterate":       iterate,
+	"IsSizeDynamic": isSizeDynamic,
 }
 
 var fixValueRE = regexp.MustCompile(`\s*\(?(\d+)U\s*<<\s*(\d+)U\)?`)
@@ -63,6 +66,40 @@ func isIn(raw any, key string) bool {
 		for _, item := range list {
 			if item.Name == key {
 				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func iterate(n int) []int {
+	out := make([]int, n)
+
+	for i := range out {
+		out[i] = i
+	}
+
+	return out
+}
+
+func isSizeDynamic(typeName string, def definition.Definition) bool {
+	if stdType, ok := stdtypes.StdTypes[typeName]; ok {
+		return stdType.DynamicSize
+	}
+
+	for _, enum := range def.Enums {
+		if enum.Name == typeName {
+			return stdtypes.StdTypes[enum.BaseType].DynamicSize
+		}
+	}
+
+	for _, m := range def.Messages {
+		if m.Name == typeName {
+			for _, f := range m.Fields {
+				if (f.Type.Array && f.Type.ArraySize == 0) || isSizeDynamic(f.Type.Name, def) {
+					return true
+				}
 			}
 		}
 	}

@@ -18,90 +18,95 @@ var testdata embed.FS
 
 var expectedModule = definition.Definition{
 	Proto: definition.Proto{ProtoID: 10},
-	Enums: []definition.Enum{
-		{
+	Enums: map[string]definition.Enum{
+		"Bool": {
 			Name:     "Bool",
 			BaseType: "uint8",
-			Values: []definition.EnumValue{
-				{Name: "false", Value: "0"},
-				{Name: "true", Value: "1"},
+			Values: map[string]definition.EnumValue{
+				"false": {Name: "false", Value: "0"},
+				"true":  {Name: "true", Value: "1"},
 			},
 		},
-		{
+		"Language": {
 			Name:     "Language",
 			BaseType: "string",
-			Values: []definition.EnumValue{
-				{Name: "go", Value: "go", Description: "go lang"},
-				{Name: "js", Value: "js", Description: "js lang"},
-				{Name: "cpp", Value: "cpp", Description: "cpp lang"},
-				{Name: "md", Value: "md", Description: "md lang"},
+			Values: map[string]definition.EnumValue{
+				"go":  {Name: "go", Value: "go", Description: "go lang"},
+				"js":  {Name: "js", Value: "js", Description: "js lang"},
+				"cpp": {Name: "cpp", Value: "cpp", Description: "cpp lang"},
+				"md":  {Name: "md", Value: "md", Description: "md lang"},
 			},
 		},
 	},
-	Messages: []definition.Message{
-		{
+	Messages: map[string]definition.Message{
+		"message1": {
 			Name: "message1",
 			ID:   1,
-			Fields: []definition.MessageField{
-				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+			Fields: map[string]definition.MessageField{
+				"field1": {Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
 			},
 		},
-		{
+		"message2": {
 			Name: "message2",
 			ID:   2,
-			Fields: []definition.MessageField{
-				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
-				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+			Fields: map[string]definition.MessageField{
+				"field1": {Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				"field2": {Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
 			},
 		},
-		{
+		"message3": {
 			Name: "message3",
 			ID:   3,
-			Fields: []definition.MessageField{
-				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
-				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
-				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
+			Fields: map[string]definition.MessageField{
+				"field1": {Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				"field2": {Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				"field3": {Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
 			},
 		},
-		{
+		"message4": {
 			Name: "message4",
 			ID:   4,
-			Fields: []definition.MessageField{
-				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
-				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
-				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
-				{Name: "field4", Type: fieldType("float", false, 0), Description: "field 4"},
+			Fields: map[string]definition.MessageField{
+				"field1": {Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				"field2": {Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				"field3": {Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
+				"field4": {Name: "field4", Type: fieldType("float", false, 0), Description: "field 4"},
 			},
 		},
-		{
+		"message5": {
 			Name: "message5",
 			ID:   5,
-			Fields: []definition.MessageField{
-				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
-				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
-				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
-				{Name: "field4", Type: fieldType("float", true, 10), Description: "field 4"},
-				{Name: "field5", Type: fieldType("float", true, 0), Description: "field 5"},
+			Fields: map[string]definition.MessageField{
+				"field1": {Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				"field2": {Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				"field3": {Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
+				"field4": {Name: "field4", Type: fieldType("float", true, 10), Description: "field 4"},
+				"field5": {Name: "field5", Type: fieldType("float", true, 0), Description: "field 5"},
 			},
 		},
-		{
+		"message6": {
 			Name: "message6",
 			ID:   6,
-			Fields: []definition.MessageField{
-				{Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
-				{Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
-				{Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
-				{Name: "field4", Type: fieldType("float", true, 10), Description: "field 4"},
-				{Name: "field5", Type: fieldType("float", true, 0), Description: "field 5"},
-				{Name: "field6", Type: fieldType("Language", false, 0), Description: "field 6"},
+			Fields: map[string]definition.MessageField{
+				"field1": {Name: "field1", Type: fieldType("Bool", false, 0), Description: "field 1"},
+				"field2": {Name: "field2", Type: fieldType("string", false, 0), Description: "field 2"},
+				"field3": {Name: "field3", Type: fieldType("int8", false, 0), Description: "field 3"},
+				"field4": {Name: "field4", Type: fieldType("float", true, 10), Description: "field 4"},
+				"field5": {Name: "field5", Type: fieldType("float", true, 0), Description: "field 5"},
+				"field6": {Name: "field6", Type: fieldType("Language", false, 0), Description: "field 6"},
 			},
 		},
 	},
 	Service: definition.Service{
-		Serving: []definition.ServicePair{
-			{Request: "message1"},
-			{Request: "message2"},
-			{Request: "message3", Response: "Bool"},
+		Serving: map[string]definition.ServicePair{
+			"message1": {Request: "message1"},
+			"message2": {Request: "message2"},
+			"message3": {Request: "message3", Response: "Bool"},
+		},
+		Sending: map[string]definition.ServicePair{
+			"message4": {Request: "message4"},
+			"message5": {Request: "message5"},
+			"message6": {Request: "message6", Response: "Bool"},
 		},
 	},
 }
@@ -115,7 +120,6 @@ var expected = []*definition.Definition{
 func setModuleID(def *definition.Definition, module config.Module) *definition.Definition {
 	out := *def
 	out.Module = module
-
 	return &out
 }
 

@@ -3,6 +3,7 @@ package validator
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/microavia/go-messgen/internal/definition"
 	"github.com/microavia/go-messgen/internal/stdtypes"
@@ -22,40 +23,30 @@ var (
 )
 
 func Validate(modules []*definition.Definition) error {
-	stdTypesSet := buildSet(stdtypes.Types)
-
-	if err := checkUniq(modules, func(v *definition.Definition) uint8 { return v.Proto.ProtoID }); err != nil {
+	err := checkUniq(modules, func(v *definition.Definition) uint8 { return v.Proto.ProtoID })
+	if err != nil {
 		return fmt.Errorf("checking proto_id uniqueness: %w", err)
 	}
 
-	for moduleID, module := range modules {
+	for _, module := range modules {
 		if module.Proto.ProtoID == 0 {
-			return fmt.Errorf("%+v: %w", moduleID, ErrNoProtoID)
+			return fmt.Errorf("%+v: %w", module.Module, ErrNoProtoID)
 		}
 
 		if len(module.Messages) == 0 {
-			return fmt.Errorf("%+v: %w", moduleID, ErrNoMessages)
+			return fmt.Errorf("%+v: %w", module.Module, ErrNoMessages)
 		}
 
-		if err := validateConstants(module.Enums, stdTypesSet); err != nil {
-			return fmt.Errorf("%+v: %w", moduleID, err)
+		if err = validateConstants(module.Enums, stdtypes.StdTypes); err != nil {
+			return fmt.Errorf("validating constants: %+v: %w", module.Module, err)
 		}
 
-		err := validateMessages(
-			module.Messages,
-			stdTypesSet,
-			buildSet(buildMap(module.Enums, func(v definition.Enum) string { return v.Name })),
-		)
-		if err != nil {
-			return fmt.Errorf("%+v: %w", moduleID, err)
+		if err = validateMessages(module.Messages, stdtypes.StdTypes, module.Enums); err != nil {
+			return fmt.Errorf("validating messages: %+v: %w", module.Module, err)
 		}
 
-		err = validateService(
-			module.Service,
-			buildSet(buildMap(module.Messages, func(v definition.Message) string { return v.Name })),
-		)
-		if err != nil {
-			return fmt.Errorf("%+v: %w", moduleID, err)
+		if err = validateService(module.Service, module.Messages); err != nil {
+			return fmt.Errorf("validating service: %+v: %w", module.Module, err)
 		}
 	}
 
@@ -63,13 +54,9 @@ func Validate(modules []*definition.Definition) error {
 }
 
 func validateConstants(
-	constants []definition.Enum,
-	stdTypes map[string]struct{},
+	constants map[string]definition.Enum,
+	stdTypes map[string]stdtypes.StdType,
 ) error {
-	if err := checkUniq(constants, func(v definition.Enum) string { return v.Name }); err != nil {
-		return fmt.Errorf("checking constants uniqueness: %w", err)
-	}
-
 	for _, c := range constants {
 		if err := validateConstant(c, stdTypes); err != nil {
 			return fmt.Errorf("constant %q: %w", c.Name, err)
@@ -79,7 +66,7 @@ func validateConstants(
 	return nil
 }
 
-func validateConstant(c definition.Enum, stdTypes map[string]struct{}) error {
+func validateConstant(c definition.Enum, stdTypes map[string]stdtypes.StdType) error {
 	if checkPresence(stdTypes, c.Name) {
 		return fmt.Errorf("standard type redefined: %q: %w", c.Name, ErrRedefined)
 	}
@@ -88,40 +75,30 @@ func validateConstant(c definition.Enum, stdTypes map[string]struct{}) error {
 		return fmt.Errorf("constant %+v: base type: %w", c, ErrUnknownType)
 	}
 
-	if err := checkUniq(c.Values, func(v definition.EnumValue) string { return v.Name }); err != nil {
-		return fmt.Errorf("checking fields uniqueness: %w", err)
-	}
-
 	return nil
 }
 
 func validateMessages(
-	messages []definition.Message,
-	stdTypes map[string]struct{},
-	constants map[string]struct{},
+	messages definition.Messages,
+	stdTypes map[string]stdtypes.StdType,
+	enums definition.Enums,
 ) error {
-	if err := checkUniq(messages, func(v definition.Message) int { return v.ID }); err != nil {
-		return fmt.Errorf("checking message_id uniqueness: %w", ErrDupID)
-	}
-
 	for _, msg := range messages {
 		switch {
 		case checkPresence(stdTypes, msg.Name):
 			return fmt.Errorf("standard type redefined: %q: %w", msg.Name, ErrRedefined)
-		case checkPresence(constants, msg.Name):
+		case checkPresence(enums, msg.Name):
 			return fmt.Errorf("constant type redefined: %q: %w", msg.Name, ErrRedefined)
 		}
 
-		err := validateMessage(
-			msg,
-			mergeSets(
-				stdTypes,
-				constants,
-				buildSet(buildMap(messages, func(v definition.Message) string { return v.Name })),
-			),
-		)
+		err := checkUniqMapValues(messages, func(v definition.Message) uint16 { return v.ID })
 		if err != nil {
-			return fmt.Errorf("%q: %w", msg.Name, err)
+			return fmt.Errorf("validating message: %q: %w", msg.Name, err)
+		}
+
+		err = validateMessage(msg, mergeSets(buildSet(stdtypes.StdTypes), buildSet(enums), buildSet(messages)))
+		if err != nil {
+			return fmt.Errorf("validating message: %q: %w", msg.Name, err)
 		}
 	}
 
@@ -136,14 +113,97 @@ func validateMessage(
 		return ErrNoMsgID
 	}
 
-	if err := checkUniq(msg.Fields, func(v definition.MessageField) string { return v.Name }); err != nil {
-		return fmt.Errorf("checking fields uniqueness: %w", err)
-	}
-
 	for _, field := range msg.Fields {
-		if !checkPresence(types, string(field.Type.Name)) {
+		if !checkPresence(types, field.Type.Name) {
 			return fmt.Errorf("field %+v: %w", field, ErrUnknownType)
 		}
+	}
+
+	return nil
+}
+
+func validateService(
+	svc definition.Service,
+	messages definition.Messages,
+) error {
+	log.Printf("checking service: %+v", svc)
+
+	if err := checkServicePairs(svc.Serving, messages); err != nil {
+		return fmt.Errorf("service: serving: %w", err)
+	}
+
+	if err := checkServicePairs(svc.Sending, messages); err != nil {
+		return fmt.Errorf("service: sending: %w", err)
+	}
+
+	for _, pair := range svc.Serving {
+		if pair.Response != "" {
+			if checkPresence(svc.Sending, pair.Response) {
+				return fmt.Errorf("service: serving: response %q is used as sending request: %w", pair.Response, ErrDupID)
+			}
+		}
+	}
+
+	for _, pair := range svc.Sending {
+		if pair.Response != "" {
+			if checkPresence(svc.Serving, pair.Response) {
+				return fmt.Errorf("service: sending: response %q is used as serving request: %w", pair.Response, ErrDupID)
+			}
+		}
+	}
+
+	return nil
+}
+
+func buildSet[K comparable, V any](m map[K]V) map[K]struct{} {
+	s := make(map[K]struct{}, len(m))
+	for k := range m {
+		s[k] = struct{}{}
+	}
+
+	return s
+}
+
+func mergeSets[K comparable](sets ...map[K]struct{}) map[K]struct{} {
+	s := make(map[K]struct{})
+	for _, set := range sets {
+		for k := range set {
+			s[k] = struct{}{}
+		}
+	}
+
+	return s
+}
+
+func checkServicePairs(
+	pairs map[string]definition.ServicePair,
+	messages definition.Messages,
+) error {
+	for _, pair := range pairs {
+		log.Printf("checking pair: %+v", pair)
+		switch {
+		case pair.Request == "":
+			return fmt.Errorf("%+v: %w", pair, ErrEmptyRequest)
+		case !checkPresence(messages, pair.Request):
+			return fmt.Errorf("%+v: request: %w", pair, ErrUnknownType)
+		case pair.Response != "" && !checkPresence(messages, pair.Response):
+			return fmt.Errorf("%+v: response: %w", pair, ErrUnknownType)
+		case pair.Request == pair.Response:
+			return fmt.Errorf("same message as request and response for %+v: %w", pair, ErrDupID)
+		}
+	}
+
+	err := checkUniqMapValues(
+		filterMap(
+			pairs,
+			func(_ string, v1 definition.ServicePair) bool {
+				return v1.Response != ""
+			},
+		),
+		func(v definition.ServicePair) string { return v.Response },
+	)
+	if err != nil {
+		return fmt.Errorf("checking response uniqueness: %w", err)
 	}
 
 	return nil
@@ -159,104 +219,46 @@ func checkPresence[K comparable, V any](m map[K]V, k K) bool {
 	return ok
 }
 
-func buildSet[K comparable, V any](m map[K]V) map[K]struct{} {
-	set := make(map[K]struct{}, len(m))
+func filterMap[K comparable, V any](m map[K]V, f func(K, V) bool) map[K]V {
+	out := make(map[K]V, len(m))
 
-	for k := range m {
-		set[k] = struct{}{}
-	}
-
-	return set
-}
-
-func mergeSets(sets ...map[string]struct{}) map[string]struct{} {
-	set := make(map[string]struct{})
-
-	for _, s := range sets {
-		for k := range s {
-			set[k] = struct{}{}
+	for k, v := range m {
+		if f(k, v) {
+			out[k] = v
 		}
-	}
-
-	return set
-}
-
-func buildMap[K comparable, V any](in []V, f func(v V) K) map[K]V {
-	out := make(map[K]V, len(in))
-
-	for _, v := range in {
-		out[f(v)] = v
 	}
 
 	return out
 }
 
 func checkUniq[V any, I comparable](in []V, f func(V) I) error {
-	set := make(map[I]int, len(in))
+	set := make(map[I]V, len(in))
 
 	for k, v := range in {
-		if existing, ok := set[f(v)]; ok {
-			return fmt.Errorf(
-				"%+v: duplicate id %+v in %+v: %w",
-				existing,
-				f(v),
-				k,
-				ErrDupID,
-			)
+		i := f(v)
+
+		if existing, ok := set[i]; ok {
+			return fmt.Errorf("%+v: duplicate id %+v in %+v: %w", existing, i, k, ErrDupID)
 		}
 
-		set[f(v)] = k
+		set[i] = v
 	}
 
 	return nil
 }
 
-func validateService(
-	svc definition.Service,
-	types map[string]struct{},
-) error {
-	if err := checkServicePairs(svc.Serving, types); err != nil {
-		return fmt.Errorf("service: serving: %w", err)
-	}
+func checkUniqMapValues[K comparable, V any, I comparable](in map[K]V, f func(V) I) error {
+	set := make(map[I]V, len(in))
 
-	return nil
-}
+	for k, v := range in {
+		i := f(v)
 
-func checkServicePairs(pairs []definition.ServicePair, types map[string]struct{}) error {
-	for _, pair := range pairs {
-		switch {
-		case pair.Request == "":
-			return fmt.Errorf("%+v: %w", pair, ErrEmptyRequest)
-		case !checkPresence(types, pair.Request):
-			return fmt.Errorf("%+v: request: %w", pair, ErrUnknownType)
-		case pair.Response != "" && !checkPresence(types, pair.Response):
-			return fmt.Errorf("%+v: response: %w", pair, ErrUnknownType)
-		case pair.Request == pair.Response:
-			return fmt.Errorf("same message as request and response for %+v: %w", pair, ErrDupID)
+		if existing, ok := set[i]; ok {
+			return fmt.Errorf("%+v: duplicate id %+v in %+v: %w", existing, i, k, ErrDupID)
 		}
-	}
 
-	if err := checkUniq(pairs, func(v definition.ServicePair) string { return v.Request }); err != nil {
-		return fmt.Errorf("checking requests uniqueness: %w", err)
-	}
-
-	err := checkUniq(
-		pairs,
-		func(v definition.ServicePair) string {
-			return ternary(v.Response != "", v.Response, v.Request)
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("checking response uniqueness: %w", err)
+		set[i] = v
 	}
 
 	return nil
-}
-
-func ternary[T any](cond bool, a, b T) T { //nolint:ireturn
-	if cond {
-		return a
-	}
-
-	return b
 }

@@ -1,0 +1,4 @@
+Serving:
+  - { request: message1, response: message2 }
+Sending:
+  - { request: message2 }
