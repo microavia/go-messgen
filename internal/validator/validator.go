@@ -3,7 +3,6 @@ package validator
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/microavia/go-messgen/internal/definition"
 	"github.com/microavia/go-messgen/internal/stdtypes"
@@ -16,6 +15,8 @@ var (
 	ErrNoMsgID       = fmt.Errorf("message: %w", ErrNoID)
 	ErrDupID         = fmt.Errorf("duplicate id: %w", ErrBadDefinition)
 	ErrNoMessages    = fmt.Errorf("no messages: %w", ErrBadDefinition)
+	ErrNoFields      = fmt.Errorf("no fields: %w", ErrBadDefinition)
+	ErrNoValues      = fmt.Errorf("no values: %w", ErrBadDefinition)
 	ErrUnknown       = fmt.Errorf("unknown: %w", ErrBadDefinition)
 	ErrUnknownType   = fmt.Errorf("type: %w", ErrUnknown)
 	ErrRedefined     = fmt.Errorf("redefined: %w", ErrBadDefinition)
@@ -25,7 +26,7 @@ var (
 func Validate(modules []*definition.Definition) error {
 	err := checkUniq(modules, func(v *definition.Definition) uint8 { return v.Proto.ProtoID })
 	if err != nil {
-		return fmt.Errorf("checking proto_id uniqueness: %w", err)
+		return fmt.Errorf("proto_id is not unique: %w", err)
 	}
 
 	for _, module := range modules {
@@ -37,7 +38,7 @@ func Validate(modules []*definition.Definition) error {
 			return fmt.Errorf("%+v: %w", module.Module, ErrNoMessages)
 		}
 
-		if err = validateConstants(module.Enums, stdtypes.StdTypes); err != nil {
+		if err = validateEnums(module.Enums, stdtypes.StdTypes); err != nil {
 			return fmt.Errorf("validating constants: %+v: %w", module.Module, err)
 		}
 
@@ -53,20 +54,24 @@ func Validate(modules []*definition.Definition) error {
 	return nil
 }
 
-func validateConstants(
-	constants map[string]definition.Enum,
+func validateEnums(
+	enums map[string]definition.Enum,
 	stdTypes map[string]stdtypes.StdType,
 ) error {
-	for _, c := range constants {
-		if err := validateConstant(c, stdTypes); err != nil {
-			return fmt.Errorf("constant %q: %w", c.Name, err)
+	for _, c := range enums {
+		if err := validateEnum(c, stdTypes); err != nil {
+			return fmt.Errorf("enum %q: %w", c.Name, err)
 		}
 	}
 
 	return nil
 }
 
-func validateConstant(c definition.Enum, stdTypes map[string]stdtypes.StdType) error {
+func validateEnum(c definition.Enum, stdTypes map[string]stdtypes.StdType) error {
+	if len(c.Values) == 0 {
+		return ErrNoValues
+	}
+
 	if checkPresence(stdTypes, c.Name) {
 		return fmt.Errorf("standard type redefined: %q: %w", c.Name, ErrRedefined)
 	}
@@ -113,6 +118,10 @@ func validateMessage(
 		return ErrNoMsgID
 	}
 
+	if len(msg.Fields) == 0 {
+		return ErrNoFields
+	}
+
 	for _, field := range msg.Fields {
 		if !checkPresence(types, field.Type.Name) {
 			return fmt.Errorf("field %+v: %w", field, ErrUnknownType)
@@ -126,8 +135,6 @@ func validateService(
 	svc definition.Service,
 	messages definition.Messages,
 ) error {
-	log.Printf("checking service: %+v", svc)
-
 	if err := checkServicePairs(svc.Serving, messages); err != nil {
 		return fmt.Errorf("service: serving: %w", err)
 	}
@@ -180,7 +187,6 @@ func checkServicePairs(
 	messages definition.Messages,
 ) error {
 	for _, pair := range pairs {
-		log.Printf("checking pair: %+v", pair)
 		switch {
 		case pair.Request == "":
 			return fmt.Errorf("%+v: %w", pair, ErrEmptyRequest)
@@ -210,10 +216,6 @@ func checkServicePairs(
 }
 
 func checkPresence[K comparable, V any](m map[K]V, k K) bool {
-	if len(m) == 0 {
-		return false
-	}
-
 	_, ok := m[k]
 
 	return ok
@@ -237,8 +239,8 @@ func checkUniq[V any, I comparable](in []V, f func(V) I) error {
 	for k, v := range in {
 		i := f(v)
 
-		if existing, ok := set[i]; ok {
-			return fmt.Errorf("%+v: duplicate id %+v in %+v: %w", existing, i, k, ErrDupID)
+		if _, ok := set[i]; ok {
+			return fmt.Errorf("%+v in %+v of %d: %w", i, k, len(in), ErrDupID)
 		}
 
 		set[i] = v
@@ -253,8 +255,8 @@ func checkUniqMapValues[K comparable, V any, I comparable](in map[K]V, f func(V)
 	for k, v := range in {
 		i := f(v)
 
-		if existing, ok := set[i]; ok {
-			return fmt.Errorf("%+v: duplicate id %+v in %+v: %w", existing, i, k, ErrDupID)
+		if _, ok := set[i]; ok {
+			return fmt.Errorf("%+v in %+v of %d: %w", i, k, len(in), ErrDupID)
 		}
 
 		set[i] = v
