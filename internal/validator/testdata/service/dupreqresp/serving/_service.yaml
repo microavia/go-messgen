@@ -1,2 +1,0 @@
-Serving:
-  - { request: message1, response: message1 }

@@ -1,3 +1,0 @@
-id: 1
-fields:
-  - {name: field1, type: int128, descr: "field 1"}

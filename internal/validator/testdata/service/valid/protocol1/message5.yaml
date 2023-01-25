@@ -1,8 +1,0 @@
-id: 5
-fields:
-  - {name: field1, type: Bool, descr: "field 1"}
-  - {name: field2, type: string, descr: "field 2"}
-  - {name: field3, type: int8, descr: "field 3"}
-  - {name: field4, type: float, descr: "field 4"}
-  - {name: field5, type: float, descr: "field 5"}
-

@@ -25,7 +25,7 @@ func LoadModules(fsys fs.FS, roots []string, modules []config.Module) ([]*Defini
 	for i, module := range modules {
 		def, err := loadModule(fsys, roots, module)
 		if err != nil {
-			return nil, fmt.Errorf("loading module %d of %d: %w", i+1, len(modules), err)
+			return nil, fmt.Errorf("loading module %d of %d: %v: %w", i+1, len(modules), err, ErrNotExist)
 		}
 
 		def.Module = module

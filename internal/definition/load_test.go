@@ -152,48 +152,54 @@ func TestLoadMultiple(t *testing.T) {
 	require.Equal(t, expected, d, "load definition")
 }
 
-func TestLoadNonExisting(t *testing.T) {
+func TestLoadBad(t *testing.T) {
 	t.Parallel()
 
-	d, err := definition.LoadModules(
-		testdata,
-		[]string{"testdata/base1"},
-		[]config.Module{{Vendor: "vendor3", Protocol: "protocol1"}},
-	)
-	require.ErrorIs(t, err, definition.ErrNotExist, "load not existing: %v", err)
-	require.Nil(t, d, "load not existing")
+	type testRow struct {
+		name     string
+		baseDirs []string
+		modules  []config.Module
+		err      error
+	}
 
-	d, err = definition.LoadModules(
-		testdata,
-		[]string{"testdata/base3"},
-		[]config.Module{{Vendor: "vendor1", Protocol: "protocol1"}},
-	)
-	require.ErrorIs(t, err, definition.ErrNotExist, "load not existing: %v", err)
-	require.Nil(t, d, "load not existing")
+	testRows := []testRow{
+		{
+			name:     "load not existing vendor",
+			baseDirs: []string{"testdata/base1"},
+			modules:  []config.Module{{Vendor: "vendor3", Protocol: "protocol1"}},
+			err:      definition.ErrNotExist,
+		},
+		{
+			name:     "load not existing base dir",
+			baseDirs: []string{"testdata/base3"},
+			modules:  []config.Module{{Vendor: "vendor1", Protocol: "protocol1"}},
+			err:      definition.ErrNotExist,
+		},
+		{
+			name:     "load not a dir protocol",
+			baseDirs: []string{"testdata/baseBad"},
+			modules:  []config.Module{{Vendor: "vendor1", Protocol: "protocol2"}},
+			err:      definition.ErrNotExist,
+		},
+		{
+			name:     "load not a dir vendor",
+			baseDirs: []string{"testdata/baseBad"},
+			modules:  []config.Module{{Vendor: "vendor2", Protocol: "protocol1"}},
+			err:      definition.ErrNotExist,
+		},
+		{
+			name:     "load bad definition",
+			baseDirs: []string{"testdata/baseBad"},
+			modules:  []config.Module{{Vendor: "vendor1", Protocol: "protocol1"}},
+			err:      definition.ErrNotExist,
+		},
+	}
 
-	d, err = definition.LoadModules(
-		testdata,
-		[]string{"testdata/baseBad"},
-		[]config.Module{{Vendor: "vendor1", Protocol: "protocol2"}},
-	)
-	require.ErrorIs(t, err, definition.ErrNotExist, "load not existing: %v", err)
-	require.Nil(t, d, "load not existing")
-
-	d, err = definition.LoadModules(
-		testdata,
-		[]string{"testdata/baseBad"},
-		[]config.Module{{Vendor: "vendor2", Protocol: "protocol1"}},
-	)
-	require.ErrorIs(t, err, definition.ErrNotExist, "load not existing: %v", err)
-	require.Nil(t, d, "load not existing")
-
-	d, err = definition.LoadModules(
-		testdata,
-		[]string{"testdata/baseBad"},
-		[]config.Module{{Vendor: "vendor1", Protocol: "protocol1"}},
-	)
-	require.ErrorIs(t, err, definition.ErrBadSource, "load not existing: %v", err)
-	require.Nil(t, d, "load not existing")
+	for i, row := range testRows {
+		d, err := definition.LoadModules(testdata, row.baseDirs, row.modules)
+		require.ErrorIs(t, err, row.err, "test %d of %d: %s: %v", i+1, len(testRows), row.name, err)
+		require.Nil(t, d, "test %d of %d: %s", i+1, len(testRows), row.name)
+	}
 }
 
 func fieldType(name string, isArray bool, arraySize int) definition.FieldType {

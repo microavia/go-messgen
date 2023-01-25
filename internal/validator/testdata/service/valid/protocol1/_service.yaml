@@ -1,6 +1,0 @@
-Serving:
-  - { request: message1}
-  - { request: message2, response: message3 }
-Sending:
-  - { request: message4}
-  - { request: message5, response: message6 }
