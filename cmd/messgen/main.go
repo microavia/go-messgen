@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -12,7 +11,6 @@ import (
 	"github.com/microavia/go-messgen/internal/config"
 	"github.com/microavia/go-messgen/internal/definition"
 	gogen "github.com/microavia/go-messgen/internal/generator/golang"
-	newgogen "github.com/microavia/go-messgen/internal/generator/newgo"
 	"github.com/microavia/go-messgen/internal/validator"
 )
 
@@ -48,8 +46,6 @@ func main() {
 	switch *cfg.Lang {
 	case "go":
 		err = gogen.GenerateModules(*cfg.OutDir, def)
-	case "newgo":
-		err = newgogen.GenerateModules(*cfg.OutDir, def)
 	default:
 		structlog.DefaultLogger.Fatal("unreachable reached: ", *cfg.Lang)
 	}
@@ -57,17 +53,6 @@ func main() {
 	if err != nil {
 		structlog.DefaultLogger.Fatal("generating code: ", err)
 	}
-
-	// fmt.Printf("%s\n", prettyPrint(def)) //nolint:forbidigo
-}
-
-func prettyPrint(v interface{}) string {
-	b, err := json.MarshalIndent(v, "", " ")
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
 }
 
 var errNotFound = errors.New("not found")

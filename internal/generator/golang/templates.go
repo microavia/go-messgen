@@ -3,7 +3,7 @@ package golang
 import (
 	"embed"
 	"io/fs"
-	"log"
+	"math/rand"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -11,14 +11,14 @@ import (
 
 	"github.com/stoewer/go-strcase"
 
-	"github.com/microavia/go-messgen/internal/definition"
+	"github.com/microavia/go-messgen/internal/sizer"
 	"github.com/microavia/go-messgen/internal/stdtypes"
 )
 
 //go:embed templates/*
 var tmplSrc embed.FS
 
-var tmplCompiled = func() map[string]*template.Template {
+var tmplCompiled = func() map[string]*template.Template { //nolint:gochecknoglobals
 	out := make(map[string]*template.Template)
 
 	templNames, err := fs.Glob(tmplSrc, "templates/*.tmpl")
@@ -31,21 +31,27 @@ var tmplCompiled = func() map[string]*template.Template {
 		shortName := strings.TrimSuffix(baseName, ".tmpl")
 
 		out[shortName] = template.Must(template.New(baseName).Funcs(TmplFuncs).ParseFS(tmplSrc, name))
-
-		log.Printf("file %q %q tmpl %+v", name, shortName, out[shortName])
-
 	}
 
 	return out
 }()
 
-var TmplFuncs = template.FuncMap{
-	"CamelCase":     strcase.UpperCamelCase,
-	"TrimPrefix":    strings.TrimPrefix,
+var TmplFuncs = template.FuncMap{ //nolint:gochecknoglobals
+	"CamelCase":     camelCase,
 	"FixValue":      fixValue,
-	"In":            isIn,
-	"Iterate":       iterate,
-	"IsSizeDynamic": isSizeDynamic,
+	"MinSize":       sizer.MinSize,
+	"MinSizeByName": sizer.MinSizeByName,
+	"ListStrings":   listStrings,
+	"RandInt":       rand.Intn,
+	"HasPostfix":    strings.HasSuffix,
+}
+
+func camelCase(str string) string {
+	if _, ok := stdtypes.StdTypes[str]; ok {
+		return str
+	}
+
+	return strcase.UpperCamelCase(str)
 }
 
 var fixValueRE = regexp.MustCompile(`\s*\(?(\d+)U\s*<<\s*(\d+)U\)?`)
@@ -54,55 +60,6 @@ func fixValue(value string) string {
 	return fixValueRE.ReplaceAllString(value, `$1 << $2`)
 }
 
-func isIn(raw any, key string) bool {
-	switch list := raw.(type) {
-	case []definition.Enum:
-		for _, item := range list {
-			if item.Name == key {
-				return true
-			}
-		}
-	case []definition.Message:
-		for _, item := range list {
-			if item.Name == key {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func iterate(n int) []int {
-	out := make([]int, n)
-
-	for i := range out {
-		out[i] = i
-	}
-
-	return out
-}
-
-func isSizeDynamic(typeName string, def definition.Definition) bool {
-	if stdType, ok := stdtypes.StdTypes[typeName]; ok {
-		return stdType.DynamicSize
-	}
-
-	for _, enum := range def.Enums {
-		if enum.Name == typeName {
-			return stdtypes.StdTypes[enum.BaseType].DynamicSize
-		}
-	}
-
-	for _, m := range def.Messages {
-		if m.Name == typeName {
-			for _, f := range m.Fields {
-				if (f.Type.Array && f.Type.ArraySize == 0) || isSizeDynamic(f.Type.Name, def) {
-					return true
-				}
-			}
-		}
-	}
-
-	return false
+func listStrings(in ...string) []string {
+	return in
 }

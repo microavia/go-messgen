@@ -19,8 +19,8 @@ var (
 	ErrNotDir    = fmt.Errorf("not a directory: %w", ErrBadSource)
 )
 
-func LoadModules(fsys fs.FS, roots []string, modules []config.Module) ([]*Definition, error) {
-	out := make([]*Definition, 0, len(modules))
+func LoadModules(fsys fs.FS, roots []string, modules []config.Module) ([]Definition, error) {
+	out := make([]Definition, 0, len(modules))
 
 	for i, module := range modules {
 		def, err := loadModule(fsys, roots, module)
@@ -36,7 +36,7 @@ func LoadModules(fsys fs.FS, roots []string, modules []config.Module) ([]*Defini
 	return out, nil
 }
 
-func loadModule(fsys fs.FS, baseDirs []string, module config.Module) (*Definition, error) {
+func loadModule(fsys fs.FS, baseDirs []string, module config.Module) (Definition, error) {
 	for _, baseDir := range baseDirs {
 		err := checkDir(fsys, strings.TrimPrefix(filepath.Join(baseDir, module.Vendor, module.Protocol), "/"))
 		if err != nil {
@@ -45,28 +45,28 @@ func loadModule(fsys fs.FS, baseDirs []string, module config.Module) (*Definitio
 
 		def, err := Load(fsys, baseDir, module)
 		if err != nil {
-			return nil, fmt.Errorf("loading %+v: %w", module, err)
+			return Definition{}, fmt.Errorf("loading %+v: %w", module, err)
 		}
 
 		return def, nil
 	}
 
-	return nil, fmt.Errorf("loading %+v: %w", module, ErrNotExist)
+	return Definition{}, fmt.Errorf("loading %+v: %w", module, ErrNotExist)
 }
 
-func Load(fsys fs.FS, baseDir string, module config.Module) (*Definition, error) {
-	out := &Definition{}
+func Load(fsys fs.FS, baseDir string, module config.Module) (Definition, error) {
+	out := Definition{}
 	root := strings.TrimPrefix(filepath.Join(baseDir, module.Vendor, module.Protocol), "/")
 
 	err := fs.WalkDir(
 		fsys,
 		root,
 		func(path string, d fs.DirEntry, errInner error) error {
-			return checkFile(fsys, root, out, path, d, errInner)
+			return checkFile(fsys, root, &out, path, d, errInner)
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("loading %+v from %q: %w", module, baseDir, err)
+		return out, fmt.Errorf("loading %+v from %q: %w", module, baseDir, err)
 	}
 
 	return out, nil
@@ -92,12 +92,13 @@ func checkFile(fsys fs.FS, root string, out *Definition, path string, d fs.DirEn
 		v := Message{}
 		if err = loadFile(fsys, path, &v); err == nil {
 			v.Name = strings.TrimSuffix(d.Name(), yamlSuffix)
-			out.Messages, err = MapAppend(out.Messages, v.Name, v)
+			out.Messages = append(out.Messages, v)
 		}
 	}
 
 	return err
 }
+
 func loadFile(fsys fs.FS, path string, o interface{}) error {
 	b, err := fs.ReadFile(fsys, path)
 	if err != nil {

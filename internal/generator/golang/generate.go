@@ -1,20 +1,19 @@
 package golang
 
 import (
-	_ "embed"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"text/template"
 
-	"github.com/microavia/go-messgen/internal/config"
 	"github.com/microavia/go-messgen/internal/definition"
-	"github.com/microavia/go-messgen/internal/stdtypes"
+	"github.com/microavia/go-messgen/internal/sortfields"
 )
 
-func GenerateModules(outDir string, definitions []*definition.Definition) error {
+func GenerateModules(outDir string, definitions []definition.Definition) error {
 	for i, module := range definitions {
-		if err := GenerateModule(outDir, *module); err != nil {
+		if err := GenerateModule(outDir, module); err != nil {
 			return fmt.Errorf("generating module %d of %d: %w", i+1, len(definitions), err)
 		}
 	}
@@ -22,16 +21,21 @@ func GenerateModules(outDir string, definitions []*definition.Definition) error 
 	return nil
 }
 
-type templateArgs struct {
-	Module   definition.Definition
-	StdTypes map[string]stdtypes.StdType
+func GenerateModule(outDir string, module definition.Definition) error {
+	return GenerateModuleByTemplates(outDir, module, tmplCompiled)
 }
 
-func GenerateModule(outDir string, module definition.Definition) error {
-	outDir = filepath.Join(outDir, module.Module.Vendor, module.Module.Protocol, "message")
+func GenerateModuleByTemplates(
+	outDir string,
+	module definition.Definition,
+	tmpls map[string]*template.Template,
+) error {
+	sortfields.SortFields(module)
 
-	for fileName, tmpl := range tmplCompiled {
-		err := templateExecute(outDir, fileName, tmpl, templateArgs{Module: module, StdTypes: stdtypes.StdTypes})
+	outDir = filepath.Join(outDir, module.Module.Vendor, module.Module.Protocol)
+
+	for fileName, tmpl := range tmpls {
+		err := templateExecute(outDir, fileName, tmpl, module)
 		if err != nil {
 			return fmt.Errorf("module %+v: generating %q: %w", module.Module, fileName, err)
 		}
@@ -40,17 +44,12 @@ func GenerateModule(outDir string, module definition.Definition) error {
 	return nil
 }
 
-type messageArgs struct {
-	Module    config.Module
-	Constants []definition.Enum
-	Messages  []definition.Message
-	Message   []definition.Message
-}
-
-func templateExecute(dir, fileName string, tmpl *template.Template, data interface{}) error {
+func templateExecute(dir, fileName string, tmpl *template.Template, data definition.Definition) error {
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return fmt.Errorf("creating directory %q: %w", dir, err)
 	}
+
+	log.Printf("writing %q", filepath.Join(dir, fileName))
 
 	f, err := os.Create(filepath.Join(dir, fileName))
 	if err != nil {

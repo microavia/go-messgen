@@ -7,11 +7,11 @@ import (
 type Definition struct {
 	Module   config.Module
 	Proto    Proto
-	Enums    Enums
-	Messages Messages
+	Enums    []Enum
+	Messages []Message
 	Service  Service
 }
 
 type Proto struct {
-	ProtoID uint8 `json:"proto_id"`
+	ID uint8 `json:"proto_id"`
 }

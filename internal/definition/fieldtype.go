@@ -15,45 +15,50 @@ type FieldType struct {
 	ArraySize int
 }
 
-var parseType = regexp.MustCompile(`^\"([^\[]+)(\[(\d*)\])?\"$`)
+var parseType = regexp.MustCompile(`^"([^\[]+)(\[(\d*)])?"$`)
 
-func (t *FieldType) UnmarshalJSON(b []byte) error {
-	typeAndSize := parseType.FindSubmatch(b)
+func ParseFieldType(input string) (FieldType, error) {
+	typeAndSize := parseType.FindStringSubmatch(input)
 	if typeAndSize == nil {
-		return fmt.Errorf("invalid input: %q: %w", b, ErrInvalidInput)
+		return FieldType{}, fmt.Errorf("%q: %w", input, ErrInvalidInput)
 	}
 
-	*t = FieldType{
-		Name:      string(typeAndSize[1]),
+	return FieldType{
+		Name:      typeAndSize[1],
 		Array:     len(typeAndSize[2]) > 0,
 		ArraySize: mustA2I(typeAndSize[3]),
-	}
-
-	return nil
+	}, nil
 }
 
-func (t FieldType) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%q", t.String())), nil
+func (f *FieldType) UnmarshalJSON(b []byte) error {
+	var err error
+	*f, err = ParseFieldType(string(b))
+
+	return err
 }
 
-func (t FieldType) String() string {
-	if t.Array {
-		if t.ArraySize == 0 {
-			return string(t.Name) + "[]"
+func (f *FieldType) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%q", f.String())), nil
+}
+
+func (f *FieldType) String() string {
+	if f.Array {
+		if f.ArraySize == 0 {
+			return f.Name + "[]"
 		}
 
-		return string(t.Name) + "[" + strconv.Itoa(t.ArraySize) + "]"
+		return f.Name + "[" + strconv.Itoa(f.ArraySize) + "]"
 	}
 
-	return string(t.Name)
+	return f.Name
 }
 
-func mustA2I(b []byte) int {
-	if len(b) == 0 {
+func mustA2I(s string) int {
+	if len(s) == 0 {
 		return 0
 	}
 
-	n, err := strconv.Atoi(string(b))
+	n, err := strconv.Atoi(s)
 	if err != nil {
 		panic(err)
 	}

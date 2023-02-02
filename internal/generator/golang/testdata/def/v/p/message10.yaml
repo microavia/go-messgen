@@ -1,0 +1,12 @@
+id: 10
+fields:
+  - {name: "field_char_slice", type: "char[]"}
+  - {name: "field_float32_slice", type: "float32[]"}
+  - {name: "field_float64_slice", type: "float64[]"}
+  - {name: "field_int16_slice", type: "int16[]"}
+  - {name: "field_int32_slice", type: "int32[]"}
+  - {name: "field_int64_slice", type: "int64[]"}
+  - {name: "field_uint16_slice", type: "uint16[]"}
+  - {name: "field_uint32_slice", type: "uint32[]"}
+  - {name: "field_uint64_slice", type: "uint64[]"}
+  - {name: "field_uint8_slice", type: "uint8[]"}
