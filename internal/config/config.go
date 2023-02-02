@@ -9,7 +9,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-type Config struct {
+type Config struct { //nolint:musttag
 	App    *kingpin.Application
 	Parsed string
 
