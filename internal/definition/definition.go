@@ -4,7 +4,7 @@ import (
 	"github.com/microavia/go-messgen/internal/config"
 )
 
-type Definition struct {
+type Definition struct { //nolint:musttag
 	Module   config.Module
 	Proto    Proto
 	Enums    []Enum
