@@ -1,0 +1,16 @@
+{
+{{ $Module := . -}}
+{{- $Enums := .Enums -}}
+{{range $EnumIndex, $Enum := $Enums}}
+  {{- if $EnumIndex}},{{end -}}
+  "{{$Enum.Name}}": {
+    "type": "{{CamelCase $Enum.BaseType}}",
+    "is_const": true,
+    "fields": [
+      {{range $ValueIndex, $Value := $Enum.Values -}}{{- if $ValueIndex }},{{ end -}}
+      {"name": "{{.Name}}", "value": "{{$Value.Value}}"}
+      {{end -}}
+    ]
+  }
+{{end -}}
+}

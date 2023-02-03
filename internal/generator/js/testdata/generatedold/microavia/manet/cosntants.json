@@ -1,0 +1,169 @@
+{
+  "Bool": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "false", "value": "0"},
+      {"name": "true", "value": "1"}
+    ]
+  },
+  "VehicleStatusFlag": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "vehicle_status_flag_armed", "value": "(1 << 0)"},
+      {"name": "vehicle_status_flag_on_ground", "value": "(1 << 1)"},
+      {"name": "vehicle_status_flag_rpm_check", "value": "(1 << 2)"},
+      {"name": "vehicle_status_flag_camera_manual_control", "value": "(1 << 3)"},
+      {"name": "vehicle_status_flag_landing", "value": "(1 << 4)"},
+      {"name": "vehicle_status_flag_valid_manual_control", "value": "(1 << 5)"}
+    ]
+  },
+  "Command": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "command_none", "value": "0"},
+      {"name": "command_storage", "value": "1"},
+      {"name": "command_sensor_calibration", "value": "2"},
+      {"name": "command_arm_disarm", "value": "3"},
+      {"name": "command_set_mode", "value": "4"},
+      {"name": "command_take_photo", "value": "5"},
+      {"name": "command_sync_photos", "value": "6"},
+      {"name": "command_set_takeoff_yaw", "value": "7"},
+      {"name": "command_camera", "value": "8"},
+      {"name": "command_stream_video", "value": "9"},
+      {"name": "command_write_video", "value": "10"},
+      {"name": "command_companion_shutdown", "value": "12"},
+      {"name": "command_set_camera_control_mode", "value": "13"},
+      {"name": "command_request_devices_description", "value": "14"}
+    ]
+  },
+  "SequenceState": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "sequence_state_none", "value": "0"},
+      {"name": "sequence_state_running", "value": "1"},
+      {"name": "sequence_state_finished", "value": "2"},
+      {"name": "sequence_state_error", "value": "3"}
+    ]
+  },
+  "MissionState": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "mission_state_none", "value": "0"},
+      {"name": "mission_state_running", "value": "1"},
+      {"name": "mission_state_finished", "value": "2"},
+      {"name": "mission_state_error", "value": "3"}
+    ]
+  },
+  "GnssCorrProto": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "gnss_corr_proto_rtcm2", "value": "0"},
+      {"name": "gnss_corr_proto_rtcm3", "value": "1"}
+    ]
+  },
+  "GnssAttMode": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "gnss_att_mode_none", "value": "0"},
+      {"name": "gnss_att_mode_float", "value": "1"},
+      {"name": "gnss_att_mode_fix", "value": "2"}
+    ]
+  },
+  "StationChargerStateEnum": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "station_charger_state_idle", "value": "0"},
+      {"name": "station_charger_state_storage", "value": "1"},
+      {"name": "station_charger_state_full", "value": "2"},
+      {"name": "station_charger_state_error", "value": "3"}
+    ]
+  },
+  "CameraCommand": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "camera_command_set_enabled", "value": "0"},
+      {"name": "camera_command_calibrate_motors", "value": "1"},
+      {"name": "camera_command_calibrate_encoders", "value": "2"},
+      {"name": "camera_command_calibrate_gyro", "value": "3"},
+      {"name": "camera_command_calibrate_accel", "value": "4"}
+    ]
+  },
+  "CameraControlMode": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "camera_control_mode_auto", "value": "0"},
+      {"name": "camera_control_mode_manual", "value": "1"}
+    ]
+  },
+  "CameraControlFlag": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "camera_control_flag_manual_focus", "value": "(1U << 0U)"},
+      {"name": "camera_control_flag_light_day", "value": "(1U << 1U)"},
+      {"name": "camera_control_flag_light_night", "value": "(1U << 2U)"}
+    ]
+  },
+  "CameraType": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "camera_type_gimbal", "value": "0"},
+      {"name": "camera_type_fpv", "value": "1"},
+      {"name": "camera_type_landing", "value": "2"}
+    ]
+  },
+  "NetworkInterfaceType": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "network_interface_type_none", "value": "0"},
+      {"name": "network_interface_type_wifi", "value": "1"},
+      {"name": "network_interface_type_lte", "value": "2"},
+      {"name": "network_interface_type_vpn", "value": "3"},
+      {"name": "network_interface_type_rfd", "value": "4"},
+      {"name": "network_interface_type_eth", "value": "5"}
+    ]
+  },
+  "FileSyncRequestType": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "file_sync_request_type_start", "value": "0"},
+      {"name": "file_sync_request_type_stop", "value": "1"},
+      {"name": "file_sync_request_type_delete", "value": "2"}
+    ]
+  },
+  "FileSyncState": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "file_sync_state_idle", "value": "0"},
+      {"name": "file_sync_state_preparing", "value": "1"},
+      {"name": "file_sync_state_running", "value": "2"},
+      {"name": "file_sync_state_finished", "value": "3"}
+    ]
+  },
+  "FileSyncErr": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "file_sync_err_ok", "value": "0"},
+      {"name": "file_sync_err_no_flight", "value": "1"},
+      {"name": "file_sync_err_no_space", "value": "2"},
+      {"name": "file_sync_err_timeout", "value": "4"},
+      {"name": "file_sync_err_internal", "value": "8"},
+      {"name": "file_sync_err_stopped", "value": "16"}
+    ]
+  }
+}

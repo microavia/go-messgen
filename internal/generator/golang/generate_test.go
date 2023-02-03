@@ -128,6 +128,7 @@ func TestGenerateModule(t *testing.T) {
 		},
 	}
 
+	os.RemoveAll(outDir)
 	defer os.RemoveAll(outDir)
 
 	err := golang.GenerateModule(outDir, def)

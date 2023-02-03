@@ -87,6 +87,7 @@ func minSizeOfArray(arraySize int, typeSize TypeSize) TypeSize {
 		MinSize: arraySize * typeSize.MinSize,
 		Dynamic: typeSize.Dynamic,
 		Align:   typeSize.Align,
+		Plain:   typeSize.Plain,
 	}
 }
 

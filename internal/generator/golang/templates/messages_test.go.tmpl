@@ -28,7 +28,7 @@ func {{$InternalPrefix}}{{$MessageName}}Rand() {{$MessageName}} {
 
 
 	{{range $Field := $Message.Fields -}}
-		{{- if HasPostfix $Field.Name "_slice_empty" -}}
+		{{- if HasSuffix $Field.Name "_slice_empty" -}}
 			v.{{CamelCase $Field.Name}} = []{{CamelCase $Field.Type.Name}}{} // {{$Field.Name}} {{$Field.Type.String}}
 		{{- else if and $Field.Type.Array $Field.Type.ArraySize -}}
 			{{$InternalPrefix}}{{CamelCase $Field.Type.Name}}ArrayRand(v.{{CamelCase $Field.Name}}[:]) // {{$Field.Name}} {{$Field.Type.String}}

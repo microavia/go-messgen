@@ -1,0 +1,505 @@
+{
+  "heartbeat": {
+    "id": 1,
+    "fields": [
+      {"name": "time", "type": "Uint64"}
+    ]
+  },
+  "vehicle_position": {
+    "id": 2,
+    "fields": [
+      {"name": "time", "type": "Uint64"},
+      {"name": "lat", "type": "Int32"},
+      {"name": "lon", "type": "Int32"},
+      {"name": "alt_el", "type": "Int32"},
+      {"name": "vel_ned", "type": "Int32[3]"},
+      {"name": "att_q_ned", "type": "Int16[4]"},
+      {"name": "flags", "type": "Uint8"}
+    ]
+  },
+  "vehicle_info": {
+    "id": 3,
+    "fields": [
+      {"name": "payload_product_id", "type": "Uint16"},
+      {"name": "country", "type": "Char[2]"},
+      {"name": "registration", "type": "Char[16]"},
+      {"name": "callsign", "type": "Char[16]"},
+      {"name": "type", "type": "Uint8"},
+      {"name": "payload_hardware_version", "type": "Uint8"},
+      {"name": "fw_version", "type": "Char[32]"}
+    ]
+  },
+  "vehicle_status": {
+    "id": 5,
+    "fields": [
+      {"name": "error_flags", "type": "Uint32"},
+      {"name": "bat_v", "type": "Uint16"},
+      {"name": "bat_c", "type": "Int16"},
+      {"name": "bat_rem", "type": "Uint16"},
+      {"name": "bat_v_min", "type": "Uint16"},
+      {"name": "bat_temp", "type": "Int16"},
+      {"name": "gnss_pos_acc", "type": "Uint16"},
+      {"name": "bat_level", "type": "Int8"},
+      {"name": "gnss_fix", "type": "Uint8"},
+      {"name": "gnss_sats", "type": "Uint8"},
+      {"name": "gnss_corr_age", "type": "Uint8"},
+      {"name": "gnss_att_mode", "type": "Uint8"},
+      {"name": "mode", "type": "Uint8"},
+      {"name": "throttle", "type": "Uint8"},
+      {"name": "payload_ready", "type": "Uint8"}
+    ]
+  },
+  "vehicle_local_position": {
+    "id": 6,
+    "fields": [
+      {"name": "time", "type": "Uint64"},
+      {"name": "pos", "type": "Int32[3]"},
+      {"name": "vel", "type": "Int32[3]"},
+      {"name": "yaw", "type": "Int16"}
+    ]
+  },
+  "telemetry_stats": {
+    "id": 7,
+    "fields": [
+      {"name": "addr", "type": "Uint32"},
+      {"name": "packets_received", "type": "Uint16"},
+      {"name": "packets_skipped", "type": "Uint16"},
+      {"name": "packets_lost", "type": "Uint16"}
+    ]
+  },
+  "gimbal_camera_status": {
+    "id": 10,
+    "fields": [
+      {"name": "pitch_sp", "type": "Float32"},
+      {"name": "yaw_sp", "type": "Float32"},
+      {"name": "zoom_sp", "type": "Uint16"},
+      {"name": "att_q_ned", "type": "Int16[4]"},
+      {"name": "zoom", "type": "Uint16"},
+      {"name": "focus", "type": "Uint16"},
+      {"name": "flags", "type": "Uint8"}
+    ]
+  },
+  "vehicle_manual_control": {
+    "id": 11,
+    "fields": [
+      {"name": "controls", "type": "Int16[4]"}
+    ]
+  },
+  "station_set_charger_management": {
+    "id": 13,
+    "fields": [
+      {"name": "enabled", "type": "Bool"},
+      {"name": "charger_id", "type": "Uint8"}
+    ]
+  },
+  "parameter_request": {
+    "id": 16,
+    "fields": [
+      {"name": "offs", "type": "Uint16"},
+      {"name": "count", "type": "Uint16"}
+    ]
+  },
+  "parameter_value": {
+    "id": 17,
+    "fields": [
+      {"name": "value_type", "type": "Uint8"},
+      {"name": "name", "type": "Uint8[]"},
+      {"name": "value", "type": "Uint8[]"}
+    ]
+  },
+  "parameter_update": {
+    "id": 18,
+    "fields": [
+      {"name": "offs", "type": "Uint16"},
+      {"name": "total_count", "type": "Uint16"},
+      {"name": "params", "type": "Uint8[]"}
+    ]
+  },
+  "parameter_ack": {
+    "id": 19,
+    "fields": [
+      {"name": "error", "type": "Uint8"}
+    ]
+  },
+  "emergency_landing_spot": {
+    "id": 21,
+    "fields": [
+      {"name": "id", "type": "Uint32"},
+      {"name": "lat", "type": "Int32"},
+      {"name": "lon", "type": "Int32"},
+      {"name": "alt_el", "type": "Int32"},
+      {"name": "yaw", "type": "Int16"}
+    ]
+  },
+  "emergency_landing_spot_list": {
+    "id": 22,
+    "fields": [
+      {"name": "spots", "type": "emergency_landing_spot[]"}
+    ]
+  },
+  "station_charger_state": {
+    "id": 24,
+    "fields": [
+      {"name": "input_current", "type": "Int16"},
+      {"name": "output_current", "type": "Int16"},
+      {"name": "input_voltage", "type": "Uint16"},
+      {"name": "output_voltage", "type": "Uint16"},
+      {"name": "current_setpoint", "type": "Int16"},
+      {"name": "charger_present", "type": "Uint8"},
+      {"name": "charger_state", "type": "StationChargerStateEnum"},
+      {"name": "charger_id", "type": "Uint8"},
+      {"name": "failure_flags", "type": "Uint8"},
+      {"name": "is_managed", "type": "Bool"},
+      {"name": "heater_power", "type": "Uint8"}
+    ]
+  },
+  "station_clear_charger_error": {
+    "id": 25,
+    "fields": [
+      {"name": "charger_id", "type": "Uint8"}
+    ]
+  },
+  "camera_state": {
+    "id": 27,
+    "fields": [
+      {"name": "camera_type", "type": "CameraType"},
+      {"name": "write_enabled", "type": "Bool"}
+    ]
+  },
+  "console_data": {
+    "id": 30,
+    "fields": [
+      {"name": "data", "type": "Uint8[]"}
+    ]
+  },
+  "mission_data": {
+    "id": 31,
+    "fields": [
+      {"name": "hash", "type": "Uint64"},
+      {"name": "offs", "type": "Uint32"},
+      {"name": "total_size", "type": "Uint32"},
+      {"name": "data", "type": "Uint8[]"}
+    ]
+  },
+  "camera_manual_control": {
+    "id": 32,
+    "fields": [
+      {"name": "pitch", "type": "Float32"},
+      {"name": "yaw", "type": "Float32"},
+      {"name": "zoom", "type": "Uint16"},
+      {"name": "focus", "type": "Uint16"},
+      {"name": "flags", "type": "Uint8"}
+    ]
+  },
+  "status_text": {
+    "id": 33,
+    "fields": [
+      {"name": "time", "type": "Uint64"},
+      {"name": "severity", "type": "Uint8"},
+      {"name": "text", "type": "Char[64]"}
+    ]
+  },
+  "mission_status": {
+    "id": 34,
+    "fields": [
+      {"name": "time", "type": "Uint64"},
+      {"name": "hash", "type": "Uint64"},
+      {"name": "progress", "type": "Float32"},
+      {"name": "curr_item", "type": "Int16"},
+      {"name": "state", "type": "MissionState"}
+    ]
+  },
+  "mission_data_ack": {
+    "id": 35,
+    "fields": [
+      {"name": "error", "type": "Uint8"}
+    ]
+  },
+  "gnss_corr_subscribe": {
+    "id": 36,
+    "fields": [
+      {"name": "protocols", "type": "GnssCorrProto"}
+    ]
+  },
+  "system_command": {
+    "id": 37,
+    "fields": [
+      {"name": "param0", "type": "Int32"},
+      {"name": "param1", "type": "Int32"},
+      {"name": "cmd", "type": "Command"}
+    ]
+  },
+  "system_command_result": {
+    "id": 38,
+    "fields": [
+      {"name": "res", "type": "Uint8"}
+    ]
+  },
+  "gnss_corr_data": {
+    "id": 39,
+    "fields": [
+      {"name": "protocol", "type": "GnssCorrProto"},
+      {"name": "data", "type": "Uint8[]"}
+    ]
+  },
+  "station_battery_info": {
+    "id": 40,
+    "fields": [
+      {"name": "shunt_resistance", "type": "Float32"},
+      {"name": "balancing_r", "type": "Float32"},
+      {"name": "charger_rate", "type": "Float32"},
+      {"name": "capacity_nominal", "type": "Uint16"},
+      {"name": "cell_v_nominal", "type": "Uint16"},
+      {"name": "temp_min", "type": "Int16"},
+      {"name": "temp_max", "type": "Int16"},
+      {"name": "temp_ready", "type": "Int16"},
+      {"name": "capacity_full", "type": "Uint16"},
+      {"name": "capacity_remaining", "type": "Uint16"},
+      {"name": "capacity_discharged", "type": "Uint16"},
+      {"name": "current", "type": "Int16"},
+      {"name": "temp", "type": "Int16[2]"},
+      {"name": "voltage", "type": "Uint16[12]"},
+      {"name": "status_flags", "type": "Uint16"},
+      {"name": "watchdog_reset_counter", "type": "Uint16"},
+      {"name": "dis_charge_cycles", "type": "Uint16"},
+      {"name": "flash_write_cycles", "type": "Uint16"},
+      {"name": "charger_id", "type": "Uint8"},
+      {"name": "battery_present", "type": "Uint8"},
+      {"name": "serial", "type": "Uint8[32]"},
+      {"name": "chemistry", "type": "Uint8"},
+      {"name": "cells_number", "type": "Uint8"},
+      {"name": "level", "type": "Uint8"}
+    ]
+  },
+  "station_seq_exec": {
+    "id": 41,
+    "fields": [
+      {"name": "cmd_id", "type": "Uint32"},
+      {"name": "seq_name", "type": "Char[16]"}
+    ]
+  },
+  "station_seq_status": {
+    "id": 42,
+    "fields": [
+      {"name": "cmd_id", "type": "Uint32"},
+      {"name": "seq_name", "type": "Char[16]"},
+      {"name": "status", "type": "SequenceState"}
+    ]
+  },
+  "station_position": {
+    "id": 43,
+    "fields": [
+      {"name": "time", "type": "Uint64"},
+      {"name": "lat", "type": "Int32"},
+      {"name": "lon", "type": "Int32"},
+      {"name": "alt_el", "type": "Int32"},
+      {"name": "yaw", "type": "Int16"}
+    ]
+  },
+  "station_motor_state": {
+    "id": 44,
+    "fields": [
+      {"name": "time", "type": "Uint64"},
+      {"name": "setpoint", "type": "Int32"},
+      {"name": "position", "type": "Int32"},
+      {"name": "current", "type": "Int16"},
+      {"name": "motor_id", "type": "Uint8"},
+      {"name": "action", "type": "Uint8"},
+      {"name": "switches", "type": "Uint8"},
+      {"name": "flags", "type": "Uint8"},
+      {"name": "control", "type": "Uint8"}
+    ]
+  },
+  "station_motor_command": {
+    "id": 45,
+    "fields": [
+      {"name": "setpoint", "type": "Int32"},
+      {"name": "motor_id", "type": "Uint8"},
+      {"name": "action", "type": "Uint8"}
+    ]
+  },
+  "ack": {
+    "id": 46,
+    "fields": [
+      {"name": "error", "type": "Uint8"}
+    ]
+  },
+  "station_keep_charged": {
+    "id": 47,
+    "fields": [
+      {"name": "slots_num", "type": "Uint8"}
+    ]
+  },
+  "mission_start": {
+    "id": 49,
+    "fields": [
+      {"name": "hash", "type": "Uint64"},
+      {"name": "start_progress", "type": "Float32"},
+      {"name": "start_item", "type": "Uint16"}
+    ]
+  },
+  "imu_data": {
+    "id": 50,
+    "fields": [
+      {"name": "gyro", "type": "Float32[3]"},
+      {"name": "accel", "type": "Float32[3]"},
+      {"name": "mag", "type": "Float32[3]"}
+    ]
+  },
+  "marker": {
+    "id": 128,
+    "fields": [
+      {"name": "pos", "type": "Float32[3]"},
+      {"name": "q", "type": "Float32[4]"},
+      {"name": "delay", "type": "Uint16"},
+      {"name": "id", "type": "Uint8"}
+    ]
+  },
+  "vehicle_sensor_description": {
+    "id": 240,
+    "fields": [
+      {"name": "type", "type": "Uint8"},
+      {"name": "id", "type": "Uint8"},
+      {"name": "priority", "type": "Uint8"},
+      {"name": "name", "type": "String"}
+    ]
+  },
+  "vehicle_device_description": {
+    "id": 241,
+    "fields": [
+      {"name": "name", "type": "String"}
+    ]
+  },
+  "vehicle_devices_description": {
+    "id": 242,
+    "fields": [
+      {"name": "sensors", "type": "vehicle_sensor_description[]"},
+      {"name": "devices", "type": "vehicle_device_description[]"},
+      {"name": "services", "type": "vehicle_device_description[]"}
+    ]
+  },
+  "vehicle_sensor_status": {
+    "id": 243,
+    "fields": [
+      {"name": "error_counter", "type": "Uint32"}
+    ]
+  },
+  "vehicle_devices_status": {
+    "id": 244,
+    "fields": [
+      {"name": "sensors_online", "type": "Uint32"},
+      {"name": "jetson", "type": "Uint8"},
+      {"name": "services_online", "type": "Uint8"},
+      {"name": "devices_online", "type": "Uint8"},
+      {"name": "sensors_info", "type": "vehicle_sensor_status[]"}
+    ]
+  },
+  "filesync_resource_status": {
+    "id": 245,
+    "fields": [
+      {"name": "files_size", "type": "Uint64"},
+      {"name": "manet_id", "type": "Uint32"},
+      {"name": "flight_id", "type": "Uint32"},
+      {"name": "files_count", "type": "Uint16"},
+      {"name": "resource_type_index", "type": "Uint8"}
+    ]
+  },
+  "filesync_storage_status": {
+    "id": 246,
+    "fields": [
+      {"name": "space_free", "type": "Uint64"},
+      {"name": "space_total", "type": "Uint64"},
+      {"name": "flights_count", "type": "Uint32"},
+      {"name": "resources", "type": "filesync_resource_status[]"},
+      {"name": "resource_type_names", "type": "String"}
+    ]
+  },
+  "filesync_request": {
+    "id": 247,
+    "fields": [
+      {"name": "manet_id", "type": "Uint32"},
+      {"name": "flight_id", "type": "Uint32"},
+      {"name": "timeout", "type": "Uint16"},
+      {"name": "request_type", "type": "FileSyncRequestType"},
+      {"name": "peer_url", "type": "String"},
+      {"name": "peer_pass", "type": "String"},
+      {"name": "resource_type", "type": "String"}
+    ]
+  },
+  "filesync_status": {
+    "id": 248,
+    "fields": [
+      {"name": "flight_size", "type": "Uint64"},
+      {"name": "progress_size", "type": "Uint64"},
+      {"name": "manet_id", "type": "Uint32"},
+      {"name": "flight_id", "type": "Uint32"},
+      {"name": "flight_count", "type": "Uint32"},
+      {"name": "progress_count", "type": "Uint32"},
+      {"name": "speed", "type": "Uint32"},
+      {"name": "status_code", "type": "FileSyncState"},
+      {"name": "error_flags", "type": "FileSyncErr"},
+      {"name": "peer_url", "type": "String"},
+      {"name": "message", "type": "String"}
+    ]
+  },
+  "meteo_data": {
+    "id": 249,
+    "fields": [
+      {"name": "light", "type": "Uint32"},
+      {"name": "baro_pressure", "type": "Uint32"},
+      {"name": "wind_direction", "type": "Uint16"},
+      {"name": "temperature", "type": "Int16"},
+      {"name": "wind_speed", "type": "Uint16"},
+      {"name": "gust_speed", "type": "Uint16"},
+      {"name": "acc_rainfall", "type": "Uint16"},
+      {"name": "u_v", "type": "Uint16"},
+      {"name": "humidity", "type": "Uint8"}
+    ]
+  },
+  "network_interface_ip": {
+    "id": 250,
+    "fields": [
+      {"name": "addr", "type": "Uint8[]"}
+    ]
+  },
+  "network_interface": {
+    "id": 251,
+    "fields": [
+      {"name": "type", "type": "NetworkInterfaceType"},
+      {"name": "link", "type": "Uint8"},
+      {"name": "exists", "type": "Uint8"},
+      {"name": "addresses", "type": "network_interface_ip[]"},
+      {"name": "specific_data", "type": "Uint8[]"}
+    ]
+  },
+  "network_status": {
+    "id": 252,
+    "fields": [
+      {"name": "interfaces", "type": "network_interface[]"}
+    ]
+  },
+  "vehicle_video_state": {
+    "id": 253,
+    "fields": [
+      {"name": "camera_states", "type": "camera_state[]"}
+    ]
+  },
+  "camera_set_stream": {
+    "id": 254,
+    "fields": [
+      {"name": "gate_port", "type": "Uint16"},
+      {"name": "enabled", "type": "Bool"},
+      {"name": "camera_type", "type": "CameraType"},
+      {"name": "video_gate_ip", "type": "Uint8[4]"},
+      {"name": "key", "type": "Uint8[16]"}
+    ]
+  },
+  "atlas_status": {
+    "id": 255,
+    "fields": [
+      {"name": "power_connected", "type": "Bool"},
+      {"name": "battery_locked", "type": "Bool"},
+      {"name": "door_switch_counter", "type": "Uint8"}
+    ]
+  }
+}
