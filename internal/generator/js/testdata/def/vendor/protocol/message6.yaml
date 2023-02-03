@@ -1,0 +1,9 @@
+id: 6
+fields:
+  - {name: "field1", type: "Bool"}
+  - {name: "field2", type: "int32[7]"}
+  - {name: "field3", type: "int16[]"}
+  - {name: "field4", type: "message10[]"}
+  - {name: "field5", type: "string"}
+  - {name: "field6", type: "float64"}
+  - {name: "field7", type: "Number"}

@@ -1,0 +1,15 @@
+{
+{{ $Module := . -}}
+{{range $MessageIndex, $Message := $Module.Messages}}
+    {{- if $MessageIndex}},{{end -}}
+    "{{ $Message.Name }}": {
+        "id" : {{ $Message.ID }},
+        "fields": [
+        {{range $FieldIndex, $Field := $Message.Fields -}}
+            {{- if $FieldIndex}},{{end -}}
+            {"name": "{{$Field.Name}}", "type": "{{CamelCase $Field.Type.Name}}{{if $Field.Type.Array}}[{{if $Field.Type.ArraySize}}{{$Field.Type.ArraySize}}{{end}}]{{end}}"}
+        {{end -}}
+        ]
+    }
+{{end -}}
+}

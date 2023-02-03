@@ -1,0 +1,18 @@
+{
+  "Bool": {
+    "type": "Uint8",
+    "is_const": true,
+    "fields": [
+      {"name": "False", "value": "0"},
+      {"name": "True", "value": "1"}
+    ]
+  },
+  "Number": {
+    "type": "Float64",
+    "is_const": true,
+    "fields": [
+      {"name": "Zero", "value": "0"},
+      {"name": "One", "value": "1"}
+    ]
+  }
+}

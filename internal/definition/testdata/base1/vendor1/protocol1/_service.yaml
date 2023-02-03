@@ -1,0 +1,8 @@
+Serving:
+  - { request: message1}
+  - { request: message2}
+  - { request: message3, response: Bool}
+Sending:
+  - { request: message4}
+  - { request: message5}
+  - { request: message6, response: Bool}

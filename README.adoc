@@ -1,0 +1,99 @@
+= go-messgen image:https://github.com/microavia/go-messgen/actions/workflows/test.yml/badge.svg?branch=main["Build Status"] image:https://coveralls.io/repos/github/microavia/go-messgen/badge.svg["Coverage Status",link="https://coveralls.io/github/microavia/go-messgen"]
+Daniel Podolsky <daniel.podolsky@microavia.com>
+:toc:
+
+[![Coverage Status](https://coveralls.io/repos/github/microavia/go-messgen/badge.svg)](https://coveralls.io/github/microavia/go-messgen)
+
+Lightweight and fast message serialization library.
+Generates message classes/structs from yml scheme.
+
+Features:
+
+- Embedded-friendly
+- Fixed size arrays
+- Dynamic size arrays
+- Nested messages
+- Messages metadata
+- Supported languages: C++, Go, JavaScript
+
+Based on the https://github.com/microavia/messgen[original messgen by Microavia].
+
+== Dependencies
+
+- Golang to build the generator
+
+== Installation
+
+[source]
+----
+go install github.com/microavia/go-messgen/cmd/messgen@latest
+----
+
+or get the precompiled binary from the https://github.com/microavia/go-messgen/releases[releases page].
+
+== Generate messages
+
+Each protocol should be placed in directory `base_dir/vendor/protocol`.
+`base_dir` is base directory for message definitions (is allowed to specify multiple base directories).
+`vendor` is protocol vendor, it is used as namespace in generated messages allowing to avoid conflict between protocols from different vendors if used in one application.
+`protocol` is protocol name, each protocol has protocol ID, that allows to use multiple protocols on single connection, e.g. bootloader and application protocols.
+
+Message generator usage:
+
+[source]
+----
+messgen -b <base_dir> -m <vendor>/<protocol> -l <lang> -o <out_dir> [-D variable=value]
+----
+
+For some languages it's necessary to specify some variables using `-D` option.
+
+Generated messages placed in `out_dir` directory.
+
+=== Go
+
+Example for Go messages generation:
+
+[source]
+----
+messgen -b ./base_dir -m my_vendor/my_protocol -l go -o out/go -D messgen_go_module=example.com/path/to/messgen
+----
+
+Variable `messgen_go_module` must point to messgen Go module (`port/go/messgen`), to add necessary imports in generated messages.
+
+=== C++
+
+Example for C++ messages generation:
+
+[source]
+----
+messgen -b ./base_dir -m my_vendor/my_protocol -l cpp -o out/cpp
+----
+
+Variable `metadata_json=true` can be passed to generate metadata in JSON format, rather than legacy.
+
+=== JS/TS
+
+Example for JS messages generation:
+
+[source]
+----
+messgen -b ./base_dir -m my_vendor/my_protocol -l json -o out/json
+----
+This command will generate json messages.
+
+The types of these messages for TS can be generated as follows:
+
+[source]
+----
+messgen -b ./base_dir -m my_vendor/my_protocol -l ts -o out/ts
+----
+
+=== MD
+
+Example for protocol documentation generation:
+
+[source]
+----
+messgen -b ./base_dir -m my_vendor/my_protocol -l md -o out/md
+----
+

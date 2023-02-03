@@ -1,0 +1,1 @@
+python3 generate.py -b ./ -m v/p -o ../generatedold -l go -D messgen_go_module=github.com/microavia/go-messgen/internal/generator/golang/testdata

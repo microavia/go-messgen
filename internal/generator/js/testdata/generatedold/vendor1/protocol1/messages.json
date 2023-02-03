@@ -1,0 +1,29 @@
+{
+  "message6": {
+    "id": 6,
+    "fields": [
+      {"name": "field6", "type": "Float64"},
+      {"name": "field7", "type": "Number"},
+      {"name": "field2", "type": "Int32[7]"},
+      {"name": "field1", "type": "Bool"},
+      {"name": "field4", "type": "message10[]"},
+      {"name": "field3", "type": "Int16[]"},
+      {"name": "field5", "type": "String"}
+    ]
+  },
+  "message10": {
+    "id": 10,
+    "fields": [
+      {"name": "field_float64_slice", "type": "Float64[]"},
+      {"name": "field_int64_slice", "type": "Int64[]"},
+      {"name": "field_uint64_slice", "type": "Uint64[]"},
+      {"name": "field_float32_slice", "type": "Float32[]"},
+      {"name": "field_int32_slice", "type": "Int32[]"},
+      {"name": "field_uint32_slice", "type": "Uint32[]"},
+      {"name": "field_int16_slice", "type": "Int16[]"},
+      {"name": "field_uint16_slice", "type": "Uint16[]"},
+      {"name": "field_char_slice", "type": "Char[]"},
+      {"name": "field_uint8_slice", "type": "Uint8[]"}
+    ]
+  }
+}

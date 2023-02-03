@@ -1,0 +1,10 @@
+- name: Bool
+  basetype: uint8
+  fields:
+    - {name: "False", value: "0"}
+    - {name: "True",  value: "1"}
+- name: Number
+  basetype: float64
+  fields:
+    - {name: "Zero", value: "0"}
+    - {name: "One",  value: "1"}
