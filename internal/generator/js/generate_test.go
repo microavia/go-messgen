@@ -1,9 +1,8 @@
-//nolint:gochecknoglobals,funlen
+//nolint:funlen
 package js_test
 
 import (
 	"embed"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -135,7 +134,7 @@ func loadJSONs(fsys fs.FS, root string) (map[string]interface{}, error) {
 			return nil
 		},
 	)
-	if err != nil {
+	if err != nil { //nolint:wsl
 		return nil, fmt.Errorf("loading from %q: %w", root, err)
 	}
 

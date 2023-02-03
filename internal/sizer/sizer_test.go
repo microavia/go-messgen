@@ -39,7 +39,7 @@ var testMinSizeRows = []testMinSizeRow{
 	{
 		name:    "static standard type array",
 		typeDef: definition.FieldType{Name: "double", Array: true, ArraySize: 5},
-		size:    sizer.TypeSize{MinSize: 40, Align: 8},
+		size:    sizer.TypeSize{MinSize: 40, Align: 8, Plain: true},
 	},
 	{
 		name:    "dynamic standard type array",
@@ -49,7 +49,7 @@ var testMinSizeRows = []testMinSizeRow{
 	{
 		name:    "static enum array",
 		typeDef: definition.FieldType{Name: "Int16Enum", Array: true, ArraySize: 5},
-		size:    sizer.TypeSize{MinSize: 10, Align: 2},
+		size:    sizer.TypeSize{MinSize: 10, Align: 2, Plain: true},
 		def:     def,
 	},
 	{

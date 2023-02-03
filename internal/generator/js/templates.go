@@ -1,14 +1,13 @@
 package js
 
 import (
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec
 	"embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/fs"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"text/template"
 
@@ -58,17 +57,7 @@ func versionProtocol(def definition.Definition) string {
 		panic(fmt.Errorf("marshaling %+v: %w", def.Module, err))
 	}
 
-	checksum := md5.Sum(b)
+	checksum := md5.Sum(b) //nolint:gosec
 
 	return hex.EncodeToString(checksum[:])[:6]
-}
-
-var fixValueRE = regexp.MustCompile(`\s*\(?(\d+)U\s*<<\s*(\d+)U\)?`)
-
-func fixValue(value string) string {
-	return fixValueRE.ReplaceAllString(value, `$1 << $2`)
-}
-
-func listStrings(in ...string) []string {
-	return in
 }
